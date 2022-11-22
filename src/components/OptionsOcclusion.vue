@@ -9,12 +9,12 @@
         placement="right"
     >
       <template #content>
-        The number of steps used by the approximation method.
+        在每次迭代中，用于遮挡的超矩形应在每个方向上移动的步伐。
         <br>
-        Default 50.
+        默认值 8。 值越小，结果越精细，但耗时也就更长。推荐该值为0.25~0.5倍的矩形大小。
       </template>
-      <el-form-item label="n_steps" prop="n_steps ">
-        <el-input-number v-model="config.n_steps" :min="2" :max="1000"/>
+      <el-form-item label="strides" prop="strides">
+        <el-input-number v-model="config.strides" :min="1" :max="256"/>
       </el-form-item>
     </el-tooltip>
     <el-tooltip
@@ -23,20 +23,12 @@
         placement="right"
     >
       <template #content>
-        Method for approximating the integral, one of riemann_right, riemann_left, riemann_middle, riemann_trapezoid or gausslegendre.
+        用于遮挡的超矩形的大小
         <br>
-        Default: gausslegendre.
+        默认值 32。值越小，结果越精细，但耗时也就更长。推荐该值为0.25~0.5倍图片大小。
       </template>
-      <el-form-item label="method" prop="method">
-        <el-select v-model="config.method"
-                   placeholder="请选择">
-          <el-option
-              v-for="item in methodOptions"
-              :key="item"
-              :label="item"
-              :value="item"
-          />
-        </el-select>
+      <el-form-item label="sliding_window_shapes" prop="sliding_window_shapes">
+        <el-input-number v-model="config.sliding_window_shapes" :min="2" :max="256"/>
       </el-form-item>
     </el-tooltip>
   </el-form>
@@ -48,8 +40,8 @@ import {reactive, ref, watch, watchEffect} from "vue";
 const formRef = ref(null);
 const methodOptions = ref(["riemann_right","riemann_left","riemann_middle","riemann_trapezoid","gausslegendre"])
 const config = reactive({
-  n_steps: 50,
-  method: "gausslegendre",
+  sliding_window_shapes: 32,
+  strides:8,
 
 });
 const emits = defineEmits(['change']);

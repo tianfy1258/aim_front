@@ -3,13 +3,17 @@
     <el-col :span="6">
       <div class="block">
         <span class="demonstration">原始图片</span>
-        <el-image :src="`http://localhost:8000/getImage?url=${imageInfo.image_url}`"></el-image>
+        <el-image :src="`http://localhost:8000/getImage?url=${imageInfo.image_url}`"
+                  :preview-src-list="[`http://localhost:8000/getImage?url=${imageInfo.image_url}`]"
+        ></el-image>
       </div>
     </el-col>
     <el-col :span="6">
       <div class="block">
         <span class="demonstration">归因输出</span>
-        <el-image :src="`http://localhost:8000/getImage?url=${imageInfo.attr_url}`"></el-image>
+        <el-image :src="`http://localhost:8000/getImage?url=${imageInfo.attr_url}`"
+                  :preview-src-list="[`http://localhost:8000/getImage?url=${imageInfo.attr_url}`]"
+        ></el-image>
       </div>
     </el-col>
     <el-col :span="12">
@@ -63,10 +67,12 @@ defineProps({
 }
 
 .image-flex .el-image {
-  /*width: 100%;*/
-  /*height: 100%;*/
-  width: 230px;
-  height: 230px;
+  width: 90%;
+  height: 90%;
+  max-width: 230px;
+  /*max-height: 230px;*/
+  /*width: 230px;*/
+  /*height: 230px;*/
 }
 
 .el-row {

@@ -104,6 +104,11 @@ const handleBeforeUpload = (rawFile) => {
 let successFileCount = 0;
 const handleSuccessUpload = (res, file, files) => {
   successFileCount += 1;
+  ElMessage({
+    message: `${file.name}上传成功，剩余：${fileCountLimit - successFileCount}个文件等待上传`,
+    grouping: true,
+    type: 'info',
+  });
   if (successFileCount !== fileCountLimit) {
     return true;
   }

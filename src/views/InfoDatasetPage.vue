@@ -23,7 +23,7 @@
                        :show-overflow-tooltip="true"/>
       <el-table-column prop="labels_num" sortable="custom" width="120" label="标签数量"
                        :show-overflow-tooltip="true"/>
-      <el-table-column prop="create_time" sortable="custom" label="创建时间" width="120" :formatter="timeFormatter"/>
+      <el-table-column prop="create_time" sortable="custom" label="创建时间" width="120" :formatter="timeFormatter()"/>
       <el-table-column prop="create_user__username" label="创建人" width="120"/>
       <el-table-column fixed="right" label="操作" width="120">
         <template #default="scope">

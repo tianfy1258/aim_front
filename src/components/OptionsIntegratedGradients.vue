@@ -14,7 +14,7 @@
         Default 50.
       </template>
       <el-form-item label="n_steps" prop="n_steps ">
-        <el-input-number v-model="config.n_steps" :min="1" :max="200"/>
+        <el-input-number v-model="config.n_steps" :min="2" :max="1000"/>
       </el-form-item>
     </el-tooltip>
     <el-tooltip

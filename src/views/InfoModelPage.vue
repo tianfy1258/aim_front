@@ -22,7 +22,7 @@
       <el-table-column prop="model_type" sortable="custom" width="120" label="类别"/>
       <el-table-column prop="model_output_shape" sortable="custom" width="140" label="输出类别个数"
                        :show-overflow-tooltip="true"/>
-      <el-table-column prop="create_time" sortable="custom" label="创建时间" width="120" :formatter="timeFormatter"/>
+      <el-table-column prop="create_time" sortable="custom" label="创建时间" width="120" :formatter="timeFormatter()"/>
       <el-table-column prop="create_user__username" label="创建人" width="120"/>
       <el-table-column fixed="right" label="操作" width="120">
         <template #default="scope">

@@ -14,7 +14,9 @@
                   leave-active-class="outAnim"
                   mode="out-in"
               >
-                <component :is="Component"/>
+                <keep-alive>
+                  <component :is="Component" />
+                </keep-alive>
               </transition>
             </router-view>
           </el-scrollbar>

@@ -1,6 +1,6 @@
 <template>
   <el-row>
-    <el-col :span="9">
+    <el-col :span="8">
       <el-form ref="formRef"
                id="InterpreterMainPageForm"
                :model="form"
@@ -30,9 +30,26 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="参数设置" prop="options" v-show="form.attribution">
-          <OptionsIntegratedGradients v-show="form.attribution === 'Integrated Gradients'"
+        <el-form-item label="启用噪声通道" prop="is_noise_tunnel" v-show="form.attribution !== 'Occlusion'">
+          <el-switch
+              v-model="form.is_noise_tunnel"
+          ></el-switch>
+        </el-form-item>
+
+        <el-form-item label="参数设置" prop="options" v-show="form.attribution && !form.is_noise_tunnel">
+          <OptionsIntegratedGradients v-if="form.attribution === 'Integrated Gradients'"
                                       @change="changeOptions"></OptionsIntegratedGradients>
+          <options-occlusion v-else-if="form.attribution === 'Occlusion'"
+                             @change="changeOptions"
+          ></options-occlusion>
+          <div v-else>无</div>
+        </el-form-item>
+
+        <el-form-item label="噪声设置" prop="is_noise_tunnel" v-show="form.is_noise_tunnel">
+          <options-noise-tunnel
+              @change="changeNoiseTunnelOptions"
+          >
+          </options-noise-tunnel>
         </el-form-item>
 
         <el-form-item label="可视化方法" prop="visualize">
@@ -80,51 +97,57 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="采样个数" prop="sample">
+        <el-form-item label="采样个数" prop="sample" v-show="false">
           <el-input-number v-model="form.sample_num" :min="1" :max="10"/>
         </el-form-item>
 
         <el-form-item>
-          <el-button  @click="handleSubmitClick(formRef,false)" style="width: 200px"
+          <el-button @click="handleSubmitClick(formRef,false)" style="width: 200px"
                      type="primary">
             获取新图片并分析
           </el-button>
         </el-form-item>
 
         <el-form-item>
-          <el-button v-show="response.length !== 0" @click="handleSubmitClick(formRef,true)" style="width: 200px" type="primary">
+          <el-button v-show="response.length !== 0" @click="handleSubmitClick(formRef,true)" style="width: 200px"
+                     type="primary">
             使用当前图片并分析
           </el-button>
         </el-form-item>
       </el-form>
 
     </el-col>
-    <el-col :span="15" v-loading="isLoading">
-      <el-scrollbar ref="scrollbarRef" max-height="94vh" always>
-        <el-row style="height: fit-content" v-for="res in response">
-          <el-col>
-            <picture-viewer :image-info="res"></picture-viewer>
-          </el-col>
-        </el-row>
-      </el-scrollbar>
-
+    <el-col :span="16" v-loading="isLoading" >
+      <el-row style="height: fit-content" v-for="res in response">
+        <el-col>
+          <picture-viewer :image-info="res"></picture-viewer>
+        </el-col>
+      </el-row>
+      <el-row>
+        <interpreter-cache-table :data="cacheData" @change="handleTableSelectionChange">
+        </interpreter-cache-table>
+      </el-row>
     </el-col>
   </el-row>
 </template>
 
 <script setup>
-import {reactive, ref, toRaw} from "vue";
+import {reactive, ref, watchEffect} from "vue";
 import OptionsIntegratedGradients from "../components/OptionsIntegratedGradients.vue";
 import {request} from "../network/request.js";
+import OptionsOcclusion from "../components/OptionsOcclusion.vue";
+import OptionsNoiseTunnel from "../components/OptionsNoiseTunnel.vue";
 import PictureViewer from "../components/PictureViewer.vue";
+import InterpreterCacheTable from "../components/InterpreterCacheTable.vue";
 
-
-let attributionOptions = ref(['Integrated Gradients']);
+let attributionOptions = ref(['Integrated Gradients', "Saliency", "DeepLift", "Occlusion"]);
 let visualizeOptions = ref(['heat_map', 'blended_heat_map']);
 let signOptions = ref(['positive', 'negative', 'absolute_value', 'all']);
 let sampleOptions = ref([{label: "随机采样", value: "random"}, {label: "指定图片", value: "custom"}]);
 let datasetOptions = ref([]);
 let modelOptions = ref([]);
+let cacheData = ref([]);
+
 const getDatasetOptions = () => {
   request({
     url: "getDatasetOptions",
@@ -158,14 +181,16 @@ getDatasetOptions();
 
 const formRef = ref(null);
 const form = reactive({
-  attribution: '',
-  model_id: '',
+  attribution: 'Saliency',
+  model_id: 1,
   options: {},
   visualize: 'heat_map',
   sign: 'all',
-  dataset_id: '',
+  dataset_id: 5576,
+  is_noise_tunnel: false,
+  noise_tunnel_options: {},
   sample_method: 'random',
-  sample_num: 3,
+  sample_num: 1,
 });
 const rules = reactive({
   attribution: [
@@ -193,6 +218,21 @@ const rules = reactive({
 const changeOptions = (op) => {
   form.options = op;
 }
+const changeNoiseTunnelOptions = (op) => {
+  form.noise_tunnel_options = op;
+}
+
+const formController = () => {
+  if (form.attribution === 'Occlusion') {
+    form.is_noise_tunnel = false;
+  }
+}
+watchEffect(formController)
+
+const handleTableSelectionChange = ({req, res, time}) => {
+  response.value = res;
+}
+
 let isLoginButtonValid = ref(true);
 let isLoading = ref(false);
 let response = ref([]);
@@ -205,6 +245,7 @@ const handleSubmitClick = (formRef, useCurrent) => {
     form_.samples = response.value.map(x => x.image_name);
     form_.sample_method = "provide"
   }
+  form_.model_name = modelOptions.value.find(x => x.value === form_.model_id).label;
   formRef.validate((valid) => {
     if (valid) {
       isLoading.value = true;
@@ -212,10 +253,17 @@ const handleSubmitClick = (formRef, useCurrent) => {
       request({
         url: "attribute",
         method: "POST",
-        timeout: 8000,
+        timeout: 10 * 60 * 1000,
         data: form_,
       }).then((res) => {
         response.value = res.data;
+        cacheData.value.push(
+            {
+              req: form_,
+              res: res.data,
+              time: new Date().getTime(),
+            }
+        )
       }).catch((err) => {
       }).finally(() => {
         isLoginButtonValid.value = true;

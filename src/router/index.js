@@ -17,7 +17,7 @@ const routes = [
       {path: 'datasets', name: "datasets", meta: {title: "数据集列表"}, component: InfoDatasetPage},
       {path: 'upload', name: 'upload', meta: {title: '文件上传'}, component: UploadPage},
       {path: 'models', name: "models", meta: {title: '模型列表'}, component: InfoModelPage},
-      {path: 'dashboard', name: "dashboard", meta: {title: '仪表盘'}, component: InterpreterMainPage}
+      {path: 'dashboard', name: "dashboard", meta: {title: '仪表盘',keepAlive:true}, component: InterpreterMainPage}
 
     ]
   },

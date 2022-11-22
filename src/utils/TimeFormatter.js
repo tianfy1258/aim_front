@@ -22,7 +22,7 @@ export function getDayStartEnd(now, isLastTime) {
 }
 
 Date.prototype.format = function (fmt) { //author: meizz
-  
+
   var o = {
     "M+": this.getMonth() + 1,                 //月份
     "d+": this.getDate(),                    //日

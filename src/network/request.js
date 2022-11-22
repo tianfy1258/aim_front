@@ -33,13 +33,14 @@ const INVALID_CODE = 401;
 
 // 响应成功
 const responseSuccessHandler = (res) => {
-    const {code, error_message} = res.data;
+    const {code, error_message,duration} = res.data;
     if (code === ERROR_CODE || code === INVALID_CODE) {
         if (error_message) {
             ElMessage({
                 message: `${error_message}`,
                 grouping: true,
                 type: 'error',
+                duration: duration ?? 3000,
             });
         }
         return Promise.reject(res);
@@ -53,6 +54,7 @@ const responseFailureHandler = (err) => {
             message: `网络错误，错误代码: ${err.response.status}`,
             grouping: true,
             type: 'error',
+
         })
     } else {
         console.log(err);
