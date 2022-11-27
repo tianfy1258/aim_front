@@ -4,7 +4,7 @@
     <el-container>
       <el-main class="el-main">
         <div class="el-main-content">
-          <el-scrollbar ref="scrollbarRef" max-height="94vh" always>
+          <el-scrollbar ref="scrollbarRef" max-height="94vh"  always>
             <bread-navigation></bread-navigation>
             <router-view v-slot="{ Component }" style="flex-grow: 1">
               <!--            <component :is="Component"/>-->
@@ -90,7 +90,10 @@ import BreadNavigation from "../components/BreadNavigation";</script>
   min-height: 94vh;
   flex-direction: column;
 }
-
+/*隐藏横向滚动条*/
+.el-scrollbar__wrap {
+  overflow-x: hidden;
+}
 .inAnim {
   animation: fadeIn;
   animation-duration: 0.2s;

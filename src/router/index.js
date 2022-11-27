@@ -7,6 +7,8 @@ const InfoDatasetPage = () => import('../views/InfoDatasetPage')
 const UploadPage = () => import('../views/UploadMainPage')
 const InfoModelPage = () => import('../views/InfoModelPage')
 const InterpreterMainPage = () => import('../views/InterpreterMainPage')
+const CoverageMainPage = () => import('../views/CoverageMainPage')
+const TensorSpaceMainPage = () => import('../views/TensorSpaceMainView')
 
 const routes = [
   {path: '/', name: "", redirect: "/login"},
@@ -17,7 +19,9 @@ const routes = [
       {path: 'datasets', name: "datasets", meta: {title: "数据集列表"}, component: InfoDatasetPage},
       {path: 'upload', name: 'upload', meta: {title: '文件上传'}, component: UploadPage},
       {path: 'models', name: "models", meta: {title: '模型列表'}, component: InfoModelPage},
-      {path: 'dashboard', name: "dashboard", meta: {title: '仪表盘',keepAlive:true}, component: InterpreterMainPage}
+      {path: 'interpreter', name: "interpreter", meta: {title: '可解释性分析',keepAlive:true}, component: InterpreterMainPage},
+      {path: 'coverage', name: "coverage", meta: {title: '覆盖测试',keepAlive:true}, component: CoverageMainPage},
+      {path: 'tensorSpace', name: "tensorSpace", meta: {title: '可视化展示',keepAlive:true}, component: TensorSpaceMainPage}
 
     ]
   },

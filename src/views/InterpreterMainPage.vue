@@ -118,13 +118,13 @@
 
     </el-col>
     <el-col :span="16" v-loading="isLoading" >
-      <el-row style="height: fit-content" v-for="res in response">
+      <el-row style="height: fit-content">
         <el-col>
-          <picture-viewer :image-info="res"></picture-viewer>
+          <picture-viewer :image-info="response[0]"></picture-viewer>
         </el-col>
       </el-row>
       <el-row>
-        <interpreter-cache-table :data="cacheData" @change="handleTableSelectionChange">
+        <interpreter-cache-table v-show="cacheData.length > 0" :data="cacheData" @change="handleTableSelectionChange">
         </interpreter-cache-table>
       </el-row>
     </el-col>

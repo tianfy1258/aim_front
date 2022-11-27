@@ -1,0 +1,429 @@
+<template>
+  <div ref="chartRef"
+       v-loading="isLoading"
+       :element-loading-text="loadingText"
+       id="main"
+       style="width: 100%;height: 800px">
+  </div>
+  <div id="PadContainer">
+    <div style="display: flex;flex-direction: column;color: white;">
+      <div id="SignaturePad">
+        <div class="item">
+          标签：{{ label }}
+        </div>
+        <div class="item">
+          预测标签：{{ predict_label }}
+        </div>
+        <div class="item">
+          置信度：{{ output }}
+        </div>
+      </div>
+      <el-button id="ClearButton" @click="getImage">获取新图片进行分析</el-button>
+
+    </div>
+  </div>
+</template>
+
+<script setup>
+import * as TSP from 'tensorspace';
+import * as tf from "@tensorflow/tfjs"
+import result from "./imagenet_result.js"
+
+import {onMounted, ref, watch} from "vue";
+import {request} from "../network/request.js";
+import {ElMessage} from "element-plus";
+
+const props = defineProps({
+  data: {
+    type: Object,
+    required: true,
+    default: {},
+  }
+})
+let isLoading = ref(false);
+let loadingText = ref("正在获取模型信息...");
+const chartRef = ref(null);
+let model = null;
+let output = ref(0);
+let predict_label = ref("");
+let label = ref("");
+
+const predict = (data, model) => {
+  model.predict([data], (val) => {
+    console.log(val);
+    let max = Math.max(...val);
+    let index = val.indexOf(max);
+    output.value = max;
+    predict_label.value = result[index];
+  });
+}
+
+onMounted(() => {
+  isLoading.value = true;
+
+  const buildModel = () => {
+    let input = new TSP.layers.RGBInput({
+      shape: [ 299, 299, 3 ],
+      name: "Input"
+    });
+    let conv2d_1 = new TSP.layers.Conv2d({ name: "conv2d_1" });
+    conv2d_1.apply( input );
+    let conv2d_2 = new TSP.layers.Conv2d({ name: "conv2d_2" });
+    conv2d_2.apply( conv2d_1 );
+    let conv2d_3 = new TSP.layers.Conv2d({ name: "conv2d_3" });
+    conv2d_3.apply( conv2d_2 );
+    let max_pooling2d_1 = new TSP.layers.Pooling2d({ name: "max_pooling2d_1" });
+    max_pooling2d_1.apply( conv2d_3 );
+    let conv2d_4 = new TSP.layers.Conv2d({ name: "conv2d_4" });
+    conv2d_4.apply( max_pooling2d_1 );
+    let conv2d_5 = new TSP.layers.Conv2d({ name: "conv2d_5" });
+    conv2d_5.apply( conv2d_4 );
+    let max_pooling2d_2 = new TSP.layers.Pooling2d({ name: "max_pooling2d_2" });
+    max_pooling2d_2.apply( conv2d_5 );
+    // block 1
+    let conv2d_9 = new TSP.layers.Conv2d({ name: "conv2d_9" });
+    conv2d_9.apply( max_pooling2d_2 );
+    let conv2d_10 = new TSP.layers.Conv2d({ name: "conv2d_10" });
+    conv2d_10.apply( conv2d_9 );
+    let conv2d_11 = new TSP.layers.Conv2d({ name: "conv2d_11" });
+    conv2d_11.apply( conv2d_10 );
+    let conv2d_7 = new TSP.layers.Conv2d({ name: "conv2d_7" });
+    conv2d_7.apply( max_pooling2d_2 );
+    let conv2d_8 = new TSP.layers.Conv2d({ name: "conv2d_8" });
+    conv2d_8.apply( conv2d_7 );
+    let average_pooling2d_1 = new TSP.layers.Pooling2d({ name: "average_pooling2d_1" });
+    average_pooling2d_1.apply( max_pooling2d_2 );
+    let conv2d_12 = new TSP.layers.Conv2d({ name: "conv2d_12" });
+    conv2d_12.apply( average_pooling2d_1 );
+    let conv2d_6 = new TSP.layers.Conv2d({ name: "conv2d_6" });
+    conv2d_6.apply( max_pooling2d_2 );
+    let mixed0 = new TSP.layers.Concatenate([ conv2d_11, conv2d_8, conv2d_12, conv2d_6 ], {
+      name: "mixed0"
+    });
+    // block 2
+    let conv2d_16 = new TSP.layers.Conv2d({ name: "conv2d_16" });
+    conv2d_16.apply( mixed0 );
+    let conv2d_17 = new TSP.layers.Conv2d({ name: "conv2d_17" });
+    conv2d_17.apply( conv2d_16 );
+    let conv2d_18 = new TSP.layers.Conv2d({ name: "conv2d_18" });
+    conv2d_18.apply( conv2d_17 );
+    let conv2d_14 = new TSP.layers.Conv2d({ name: "conv2d_14" });
+    conv2d_14.apply( mixed0 );
+    let conv2d_15 = new TSP.layers.Conv2d({ name: "conv2d_15" });
+    conv2d_15.apply( conv2d_14 );
+    let average_pooling2d_2 = new TSP.layers.Pooling2d({ name: "average_pooling2d_2" });
+    average_pooling2d_2.apply( mixed0 );
+    let conv2d_19 = new TSP.layers.Conv2d({ name: "conv2d_19" });
+    conv2d_19.apply( average_pooling2d_2 );
+    let conv2d_13 = new TSP.layers.Conv2d({ name: "conv2d_13" });
+    conv2d_13.apply( mixed0 );
+    let mixed1 = new TSP.layers.Concatenate([ conv2d_18, conv2d_15, conv2d_19, conv2d_13 ], {
+      name: "mixed1"
+    });
+    // block 3
+    let conv2d_23 = new TSP.layers.Conv2d({ name: "conv2d_23" });
+    conv2d_23.apply( mixed1 );
+    let conv2d_24 = new TSP.layers.Conv2d({ name: "conv2d_24" });
+    conv2d_24.apply( conv2d_23 );
+    let conv2d_25 = new TSP.layers.Conv2d({ name: "conv2d_25" });
+    conv2d_25.apply( conv2d_24 );
+    let conv2d_21 = new TSP.layers.Conv2d({ name: "conv2d_21" });
+    conv2d_21.apply( mixed1 );
+    let conv2d_22 = new TSP.layers.Conv2d({ name: "conv2d_22" });
+    conv2d_22.apply( conv2d_21 );
+    let average_pooling2d_3 = new TSP.layers.Pooling2d({ name: "average_pooling2d_3" });
+    average_pooling2d_3.apply( mixed1 );
+    let conv2d_26 = new TSP.layers.Conv2d({ name: "conv2d_26" });
+    conv2d_26.apply( average_pooling2d_3 );
+    let conv2d_20 = new TSP.layers.Conv2d({ name: "conv2d_20" });
+    conv2d_20.apply( mixed1 );
+    let mixed2 = new TSP.layers.Concatenate([ conv2d_25, conv2d_22, conv2d_26, conv2d_20 ], {
+      name: "mixed2"
+    });
+    // block 4
+    let conv2d_28 = new TSP.layers.Conv2d({ name: "conv2d_28" });
+    conv2d_28.apply( mixed2 );
+    let conv2d_29 = new TSP.layers.Conv2d({ name: "conv2d_29" });
+    conv2d_29.apply( conv2d_28 );
+    let conv2d_30 = new TSP.layers.Conv2d({ name: "conv2d_30" });
+    conv2d_30.apply( conv2d_29 );
+    let conv2d_27 = new TSP.layers.Conv2d({ name: "conv2d_27" });
+    conv2d_27.apply( mixed2 );
+    let max_pooling2d_3 = new TSP.layers.Pooling2d({ name: "max_pooling2d_3" });
+    max_pooling2d_3.apply( mixed2 );
+    let mixed3 = new TSP.layers.Concatenate([ conv2d_30, conv2d_27, max_pooling2d_3 ], {
+      name: "mixed3"
+    });
+    // block 5
+    let conv2d_35 = new TSP.layers.Conv2d({ name: "conv2d_35" });
+    conv2d_35.apply( mixed3 );
+    let conv2d_36 = new TSP.layers.Conv2d({ name: "conv2d_36" });
+    conv2d_36.apply( conv2d_35 );
+    let conv2d_37 = new TSP.layers.Conv2d({ name: "conv2d_37" });
+    conv2d_37.apply( conv2d_36 );
+    let conv2d_38 = new TSP.layers.Conv2d({ name: "conv2d_38" });
+    conv2d_38.apply( conv2d_37 );
+    let conv2d_39 = new TSP.layers.Conv2d({ name: "conv2d_39" });
+    conv2d_39.apply( conv2d_38 );
+    let conv2d_32 = new TSP.layers.Conv2d({ name: "conv2d_32" });
+    conv2d_32.apply( mixed3 );
+    let conv2d_33 = new TSP.layers.Conv2d({ name: "conv2d_33" });
+    conv2d_33.apply( conv2d_32 );
+    let conv2d_34 = new TSP.layers.Conv2d({ name: "conv2d_34" });
+    conv2d_34.apply( conv2d_33 );
+    let average_pooling2d_4 = new TSP.layers.Pooling2d({ name: "average_pooling2d_4" });
+    average_pooling2d_4.apply( mixed3 );
+    let conv2d_40 = new TSP.layers.Conv2d({ name: "conv2d_40" });
+    conv2d_40.apply( average_pooling2d_4 );
+    let conv2d_31 = new TSP.layers.Conv2d({ name: "conv2d_31" });
+    conv2d_31.apply( mixed3 );
+    let mixed4 = new TSP.layers.Concatenate([ conv2d_39, conv2d_34, conv2d_40, conv2d_31 ], {
+      name: "mixed4"
+    });
+    // block 6
+    let conv2d_45 = new TSP.layers.Conv2d({ name: "conv2d_45" });
+    conv2d_45.apply( mixed4 );
+    let conv2d_46 = new TSP.layers.Conv2d({ name: "conv2d_46" });
+    conv2d_46.apply( conv2d_45 );
+    let conv2d_47 = new TSP.layers.Conv2d({ name: "conv2d_47" });
+    conv2d_47.apply( conv2d_46 );
+    let conv2d_48 = new TSP.layers.Conv2d({ name: "conv2d_48" });
+    conv2d_48.apply( conv2d_47 );
+    let conv2d_49 = new TSP.layers.Conv2d({ name: "conv2d_49" });
+    conv2d_49.apply( conv2d_48 );
+    let conv2d_42 = new TSP.layers.Conv2d({ name: "conv2d_42" });
+    conv2d_42.apply( mixed4 );
+    let conv2d_43 = new TSP.layers.Conv2d({ name: "conv2d_43" });
+    conv2d_43.apply( conv2d_42 );
+    let conv2d_44 = new TSP.layers.Conv2d({ name: "conv2d_44" });
+    conv2d_44.apply( conv2d_43 );
+    let average_pooling2d_5 = new TSP.layers.Pooling2d({ name: "average_pooling2d_5" });
+    average_pooling2d_5.apply( mixed4 );
+    let conv2d_50 = new TSP.layers.Conv2d({ name: "conv2d_50" });
+    conv2d_50.apply( average_pooling2d_5 );
+    let conv2d_41 = new TSP.layers.Conv2d({ name: "conv2d_41" });
+    conv2d_41.apply( mixed4 );
+    let mixed5 = new TSP.layers.Concatenate([ conv2d_49, conv2d_44, conv2d_50, conv2d_41 ], {
+      name: "mixed5"
+    });
+    // block 7
+    let conv2d_55 = new TSP.layers.Conv2d({ name: "conv2d_55" });
+    conv2d_55.apply( mixed5 );
+    let conv2d_56 = new TSP.layers.Conv2d({ name: "conv2d_56" });
+    conv2d_56.apply( conv2d_55 );
+    let conv2d_57 = new TSP.layers.Conv2d({ name: "conv2d_57" });
+    conv2d_57.apply( conv2d_56 );
+    let conv2d_58 = new TSP.layers.Conv2d({ name: "conv2d_58" });
+    conv2d_58.apply( conv2d_57 );
+    let conv2d_59 = new TSP.layers.Conv2d({ name: "conv2d_59" });
+    conv2d_59.apply( conv2d_58 );
+    let conv2d_52 = new TSP.layers.Conv2d({ name: "conv2d_52" });
+    conv2d_52.apply( mixed5 );
+    let conv2d_53 = new TSP.layers.Conv2d({ name: "conv2d_53" });
+    conv2d_53.apply( conv2d_52 );
+    let conv2d_54 = new TSP.layers.Conv2d({ name: "conv2d_54" });
+    conv2d_54.apply( conv2d_53 );
+    let average_pooling2d_6 = new TSP.layers.Pooling2d({ name: "average_pooling2d_6" });
+    average_pooling2d_6.apply( mixed5 );
+    let conv2d_60 = new TSP.layers.Conv2d({ name: "conv2d_60" });
+    conv2d_60.apply( average_pooling2d_6 );
+    let conv2d_51 = new TSP.layers.Conv2d({ name: "conv2d_51" });
+    conv2d_51.apply( mixed5 );
+    let mixed6 = new TSP.layers.Concatenate([ conv2d_59, conv2d_54, conv2d_60, conv2d_51 ], {
+      name: "mixed6"
+    });
+    // block 8
+    let conv2d_65 = new TSP.layers.Conv2d({ name: "conv2d_65" });
+    conv2d_65.apply( mixed6 );
+    let conv2d_66 = new TSP.layers.Conv2d({ name: "conv2d_66" });
+    conv2d_66.apply( conv2d_65 );
+    let conv2d_67 = new TSP.layers.Conv2d({ name: "conv2d_67" });
+    conv2d_67.apply( conv2d_66 );
+    let conv2d_68 = new TSP.layers.Conv2d({ name: "conv2d_68" });
+    conv2d_68.apply( conv2d_67 );
+    let conv2d_69 = new TSP.layers.Conv2d({ name: "conv2d_69" });
+    conv2d_69.apply( conv2d_68 );
+    let conv2d_62 = new TSP.layers.Conv2d({ name: "conv2d_62" });
+    conv2d_62.apply( mixed6 );
+    let conv2d_63 = new TSP.layers.Conv2d({ name: "conv2d_63" });
+    conv2d_63.apply( conv2d_62 );
+    let conv2d_64 = new TSP.layers.Conv2d({ name: "conv2d_64" });
+    conv2d_64.apply( conv2d_63 );
+    let average_pooling2d_7 = new TSP.layers.Pooling2d({ name: "average_pooling2d_7" });
+    average_pooling2d_7.apply( mixed6 );
+    let conv2d_70 = new TSP.layers.Conv2d({ name: "conv2d_70" });
+    conv2d_70.apply( average_pooling2d_7 );
+    let conv2d_61 = new TSP.layers.Conv2d({ name: "conv2d_61" });
+    conv2d_61.apply( mixed6 );
+    let mixed7 = new TSP.layers.Concatenate([ conv2d_69, conv2d_64, conv2d_70, conv2d_61 ], {
+      name: "mixed7"
+    });
+    // block 9
+    let conv2d_73 = new TSP.layers.Conv2d({ name: "conv2d_73" });
+    conv2d_73.apply( mixed7 );
+    let conv2d_74 = new TSP.layers.Conv2d({ name: "conv2d_74" });
+    conv2d_74.apply( conv2d_73 );
+    let conv2d_75 = new TSP.layers.Conv2d({ name: "conv2d_75" });
+    conv2d_75.apply( conv2d_74 );
+    let conv2d_76 = new TSP.layers.Conv2d({ name: "conv2d_76" });
+    conv2d_76.apply( conv2d_75 );
+    let conv2d_71 = new TSP.layers.Conv2d({ name: "conv2d_71" });
+    conv2d_71.apply( mixed7 );
+    let conv2d_72 = new TSP.layers.Conv2d({ name: "conv2d_72" });
+    conv2d_72.apply( conv2d_71 );
+    let max_pooling2d_4 = new TSP.layers.Pooling2d({ name: "max_pooling2d_4" });
+    max_pooling2d_4.apply( mixed7 );
+    let mixed8 = new TSP.layers.Concatenate([ conv2d_76, conv2d_72, max_pooling2d_4 ], {
+      name: "mixed8"
+    });
+    // block 10
+    let conv2d_81 = new TSP.layers.Conv2d({ name: "conv2d_81" });
+    conv2d_81.apply( mixed8 );
+    let conv2d_82 = new TSP.layers.Conv2d({ name: "conv2d_82" });
+    conv2d_82.apply( conv2d_81 );
+    let conv2d_83 = new TSP.layers.Conv2d({ name: "conv2d_83" });
+    conv2d_83.apply( conv2d_82 );
+    let conv2d_84 = new TSP.layers.Conv2d({ name: "conv2d_84" });
+    conv2d_84.apply( conv2d_82 );
+    let concatenate_1 = new TSP.layers.Concatenate([ conv2d_83, conv2d_84 ], {
+      name: "concatenate_1"
+    });
+    let conv2d_78 = new TSP.layers.Conv2d({ name: "conv2d_78" });
+    conv2d_78.apply( mixed8 );
+    let conv2d_79 = new TSP.layers.Conv2d({ name: "conv2d_79" });
+    conv2d_79.apply( conv2d_78 );
+    let conv2d_80 = new TSP.layers.Conv2d({ name: "conv2d_80" });
+    conv2d_80.apply( conv2d_78 );
+    let mixed9_0 = new TSP.layers.Concatenate([ conv2d_79, conv2d_80 ], {
+      name: "mixed9_0"
+    });
+    let average_pooling2d_8 = new TSP.layers.Pooling2d({ name: "average_pooling2d_8" });
+    average_pooling2d_8.apply( mixed8 );
+    let conv2d_85 = new TSP.layers.Conv2d({ name: "conv2d_85" });
+    conv2d_85.apply( average_pooling2d_8 );
+    let conv2d_77 = new TSP.layers.Conv2d({ name: "conv2d_77" });
+    conv2d_77.apply( mixed8 );
+    let mixed9 = new TSP.layers.Concatenate([ concatenate_1, mixed9_0, conv2d_85, conv2d_77 ], {
+      name: "mixed9"
+    });
+    // block 11
+    let conv2d_90 = new TSP.layers.Conv2d({ name: "conv2d_90" });
+    conv2d_90.apply( mixed9 );
+    let conv2d_91 = new TSP.layers.Conv2d({ name: "conv2d_91" });
+    conv2d_91.apply( conv2d_90 );
+    let conv2d_92 = new TSP.layers.Conv2d({ name: "conv2d_92" });
+    conv2d_92.apply( conv2d_91 );
+    let conv2d_93 = new TSP.layers.Conv2d({ name: "conv2d_93" });
+    conv2d_93.apply( conv2d_91 );
+    let concatenate_2 = new TSP.layers.Concatenate([ conv2d_92, conv2d_93 ], {
+      name: "concatenate_2"
+    });
+    let conv2d_87 = new TSP.layers.Conv2d({ name: "conv2d_87" });
+    conv2d_87.apply( mixed9 );
+    let conv2d_88 = new TSP.layers.Conv2d({ name: "conv2d_88" });
+    conv2d_88.apply( conv2d_87 );
+    let conv2d_89 = new TSP.layers.Conv2d({ name: "conv2d_89" });
+    conv2d_89.apply( conv2d_87 );
+    let mixed9_1 = new TSP.layers.Concatenate([ conv2d_88, conv2d_89 ], {
+      name: "mixed9_1"
+    });
+    let average_pooling2d_9 = new TSP.layers.Pooling2d({ name: "average_pooling2d_9" });
+    average_pooling2d_9.apply( mixed9 );
+    let conv2d_94 = new TSP.layers.Conv2d({ name: "conv2d_94" });
+    conv2d_94.apply( average_pooling2d_9 );
+    let conv2d_86 = new TSP.layers.Conv2d({ name: "conv2d_86" });
+    conv2d_86.apply( mixed9 );
+    let mixed10 = new TSP.layers.Concatenate([ concatenate_2, mixed9_1, conv2d_94, conv2d_86 ], {
+      name: "mixed10"
+    });
+    let avg_pool = new TSP.layers.GlobalPooling2d({ name: "avg_pool" });
+    avg_pool.apply( mixed10 );
+    let predictions = new TSP.layers.Output1d( {
+
+      paging: true,
+      segmentLength: 400,
+      outputs: result,
+      name: "predictions"
+
+    } );
+    predictions.apply( avg_pool );
+    return new TSP.models.Model( chartRef.value, {
+      inputs: [ input ],
+      outputs: [ predictions ],
+      predictDataShapes: [ [ 299, 299, 3 ] ]
+    });
+  }
+  model = buildModel();
+  model.load({
+    type: "keras",
+    url: "http://localhost:8000/getFile/inceptionv3.json",
+    onProgress: function (fraction) {
+      loadingText.value = "模型加载进度：" + (fraction * 100).toFixed(2) + "%";
+    },
+    onComplete: function () {
+      loadingText.value = "模型加载完成，正在初始化...";
+    }
+  });
+
+  model.init(function () {
+    isLoading.value = false;
+  });
+
+
+});
+const getImage = () => {
+  request({
+    url: "getJsonImage",
+    params:{
+      width:299,
+      height:299,
+      scale:true,
+    },
+    method: "get",
+  }).then(res => {
+    ElMessage({
+      message: "加载图片成功",
+      grouping: true,
+      type: 'success',
+    });
+    label.value = res.label;
+    predict(res.data, model);
+  });
+}
+watch(props.data, (val) => {
+  let randomData = tf.randomNormal([1, 100]).dataSync();
+  model.predict([randomData, [val.number]]);
+});
+watch(loadingText, value => {
+  let node = document.getElementsByClassName("el-loading-text");
+  if (node[0]) {
+    node[0].innerHTML = value;
+  }
+});
+
+</script>
+
+<style scoped>
+#PadContainer {
+  position: relative;
+  float: right;
+  top: -110px;
+}
+
+#SignaturePad {
+  background: rgba(39, 73, 105, 0.72);
+  width: 350px;
+  height: 80px;
+}
+
+#ClearButton {
+  width: 100%;
+}
+#SignaturePad .item {
+  text-align: left;
+  width: 330px;
+  height: 25px;
+  overflow: hidden;
+  padding-left: 15px;
+}
+</style>

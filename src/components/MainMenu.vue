@@ -36,18 +36,21 @@
         <el-menu-item index="/main/tasks">任务列表</el-menu-item>
         <el-menu-item index="/main/tasks/create"  v-show="isValid(['manager'])">任务创建</el-menu-item>
       </el-sub-menu>
+
       <el-sub-menu index="4"  v-show="isValid(['manager'])">
         <template #title>
           <el-icon>
             <odometer/>
           </el-icon>
-          可解释性分析
+          模型分析
         </template>
-        <el-menu-item index="/main/dashboard">仪表盘</el-menu-item>
+        <el-menu-item index="/main/interpreter">可解释分析</el-menu-item>
+        <el-menu-item index="/main/coverage">覆盖测试</el-menu-item>
+        <el-menu-item index="/main/tensorSpace">可视化展示</el-menu-item>
       </el-sub-menu>
 
-    </el-menu>
 
+    </el-menu>
   </el-aside>
 </template>
 
