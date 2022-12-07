@@ -3,8 +3,8 @@
     <el-col :span="6">
       <div class="block" v-show="imageInfo">
         <span class="demonstration">原始图片</span>
-        <el-image :src="`http://localhost:8000/getImage?url=${imageInfo?.image_url}`"
-                  :preview-src-list="[`http://localhost:8000/getImage?url=${imageInfo?.image_url}`]"
+        <el-image :src="`${BASE_URL}getImage?url=${imageInfo?.image_url}`"
+                  :preview-src-list="[`${BASE_URL}getImage?url=${imageInfo?.image_url}`]"
         >
           <template #error>
             <div class="image-slot">
@@ -18,8 +18,8 @@
     <el-col :span="6">
       <div class="block" v-show="imageInfo">
         <span class="demonstration">归因输出</span>
-        <el-image :src="`http://localhost:8000/getImage?url=${imageInfo?.attr_url}`"
-                  :preview-src-list="[`http://localhost:8000/getImage?url=${imageInfo?.attr_url}`]"
+        <el-image :src="`${BASE_URL}getImage?url=${imageInfo?.attr_url}`"
+                  :preview-src-list="[`${BASE_URL}getImage?url=${imageInfo?.attr_url}`]"
         >
           <template #error>
             <div class="image-slot">
@@ -58,13 +58,13 @@
 </template>
 
 <script setup>
+import {BASE_URL} from "../network/request.js"
 import { Picture as IconPicture } from '@element-plus/icons-vue'
 defineProps({
   imageInfo:{
     type:Object,
   }
 })
-
 
 </script>
 

@@ -4,7 +4,7 @@
     <el-container>
       <el-main class="el-main">
         <div class="el-main-content">
-          <el-scrollbar ref="scrollbarRef" max-height="94vh"  always>
+          <el-scrollbar ref="scrollbarRef" max-height="94vh" always>
             <bread-navigation></bread-navigation>
             <router-view v-slot="{ Component }" style="flex-grow: 1">
               <!--            <component :is="Component"/>-->
@@ -14,8 +14,8 @@
                   leave-active-class="outAnim"
                   mode="out-in"
               >
-                <keep-alive>
-                  <component :is="Component" />
+                <keep-alive :include="['interpreter','coverage','tensorspace']">
+                  <component :is="Component"/>
                 </keep-alive>
               </transition>
             </router-view>
@@ -28,7 +28,21 @@
 
 <script setup>
 import MainMenu from "../components/MainMenu.vue";
-import BreadNavigation from "../components/BreadNavigation";</script>
+import BreadNavigation from "../components/BreadNavigation";
+import {useRoute} from 'vue-router'
+import {ref, watch} from 'vue';
+
+// const includeList = ref([]);
+// const route = useRoute();
+// watch(() => route, (newVal, oldVal) => {
+//   if (newVal.meta.keepAlive && includeList.value.indexOf(newVal.name) === -1) {
+//     includeList.value.push(newVal.name);
+//   }
+//   console.log(includeList.value);
+// }, {deep: true});
+
+
+</script>
 
 
 <style scoped>
@@ -90,10 +104,12 @@ import BreadNavigation from "../components/BreadNavigation";</script>
   min-height: 94vh;
   flex-direction: column;
 }
+
 /*隐藏横向滚动条*/
 .el-scrollbar__wrap {
   overflow-x: hidden;
 }
+
 .inAnim {
   animation: fadeIn;
   animation-duration: 0.2s;

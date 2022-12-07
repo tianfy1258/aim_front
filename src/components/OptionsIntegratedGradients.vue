@@ -2,18 +2,18 @@
   <el-form ref="formRef"
            :model="config"
            id="OptionsIntegratedGradientsForm"
-           label-width="60px">
+           label-width="80px">
     <el-tooltip
         class="box-item"
         effect="dark"
         placement="right"
     >
       <template #content>
-        The number of steps used by the approximation method.
+        近似方法迭代次数
         <br>
-        Default 50.
+        默认值 50，值越大，耗时越长且占用的内存越多。
       </template>
-      <el-form-item label="n_steps" prop="n_steps ">
+      <el-form-item label="迭代次数" prop="n_steps ">
         <el-input-number v-model="config.n_steps" :min="2" :max="1000"/>
       </el-form-item>
     </el-tooltip>
@@ -23,11 +23,11 @@
         placement="right"
     >
       <template #content>
-        Method for approximating the integral, one of riemann_right, riemann_left, riemann_middle, riemann_trapezoid or gausslegendre.
+        近似积分的方法。
         <br>
-        Default: gausslegendre.
+        默认值 gausslegendre。
       </template>
-      <el-form-item label="method" prop="method">
+      <el-form-item label="近似方法" prop="method">
         <el-select v-model="config.method"
                    placeholder="请选择">
           <el-option

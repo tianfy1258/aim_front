@@ -52,7 +52,7 @@ import {UploadFilled} from '@element-plus/icons-vue'
 import {ref} from "vue";
 import {BASE_URL, request} from "../network/request";
 import {ElMessage} from "element-plus";
-import {VueComponent} from '@/document/upload_dataset_description.md'
+import {VueComponent} from '@/document/upload_model_description.md'
 import {validToken} from "../network/validToken.js";
 
 const emit = defineEmits(["finish"]);

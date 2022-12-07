@@ -28,7 +28,6 @@
                     ref="passwordInputRef"
                     @keyup.enter="onSubmit(formRef)"
                     v-model="form.password" placeholder="请输入密码">
-
             <template #prefix>
               <el-icon class="el-input__icon">
                 <lock/>
@@ -67,8 +66,8 @@ const props = defineProps({
 })
 
 let form = reactive({
-  username: "root",
-  password: "123456",
+  username: "",
+  password: "",
 })
 const rules = reactive({
   username: [

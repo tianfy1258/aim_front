@@ -22,12 +22,12 @@ onMounted(() => {
   myChart = echarts.init(chartRef.value);
   option && myChart.setOption(option);
 });
-let task_key = null;
+let task_key = ref(null);
 let data = [];
 watch(props.data, (val) => {
   let option = {};
-  if (task_key !== val.task_key) {
-    task_key = val.task_key;
+  if (task_key.value !== val.task_key) {
+    task_key.value = val.task_key;
     data = [];
   }
   let xAxisData = [];
@@ -54,9 +54,7 @@ watch(props.data, (val) => {
 
 });
 option = {
-  title: {
-    text: '覆盖率',
-  },
+
   tooltip: {
     show: true
   },
@@ -66,14 +64,15 @@ option = {
     splitLine: {
       show: false
     },
-    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    data: [0]
   },
   yAxis: {
+    name:"覆盖率",
     type: 'value'
   },
   series: [
     {
-      data: [150, 230, 224, 218, 135, 147, 260],
+      data: [0],
       type: 'line',
       showSymbol: false,
     }

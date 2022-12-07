@@ -4,7 +4,8 @@ import {ElMessage} from "element-plus";
 
 const MODE = import.meta.env.MODE
 
-export const BASE_URL = MODE === "development" ? "http://localhost:8000/" : "";
+export const BASE_URL = MODE === "development" ? "http://localhost:8000/api/" : `${window.location.origin}/api/`;
+export const DOWNLOAD_URL = MODE === "development" ? "http://localhost:8000/" : `${window.location.origin}/`;
 
 axios.defaults.withCredentials = true;
 // 创建实例

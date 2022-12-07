@@ -7,7 +7,7 @@
       style="width:800px">
 
     <div v-loading="isLoading">
-      <el-form-item label="模型类名">
+      <el-form-item label="模型类名" prop="model_classname">
         <el-select v-model="form.model_classname"
                    placeholder="请选择模型类名">
           <el-option
@@ -18,7 +18,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="处理方法">
+      <el-form-item label="处理方法" prop="image_processor">
         <el-select v-model="form.image_processor"
                    placeholder="请选择处理方法">
           <el-option

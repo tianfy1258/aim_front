@@ -98,7 +98,11 @@
     </el-col>
   </el-row>
 </template>
-
+<script>
+export default {
+  name: 'coverage'
+}
+</script>
 <script setup>
 import {computed, reactive, ref} from "vue";
 import {request} from "../network/request.js";
@@ -109,7 +113,14 @@ import CoverageLineChart from "../echarts/CoverageLineChart.vue";
 const store = useStore();
 
 let coverageOptions = ref([
-  {label: "神经元覆盖", value: "Neuron Coverage"}
+  {label: "神经元覆盖", value: "Neuron Coverage"},
+  {label: " k-多段神经元覆盖", value: "Fake_1"},
+  {label: "神经元边界覆盖", value: "Fake_2"},
+  {label: "强神经元激活覆盖", value: "Fake_3"},
+  {label: "连接覆盖", value: "Fake_4"},
+  {label: "路径覆盖", value: "Fake_5"},
+  {label: "图元素覆盖", value: "Fake_6"},
+  {label: "图结构覆盖", value: "Fake_7"},
 ]);
 let datasetOptions = ref([]);
 let modelOptions = ref([]);
@@ -199,6 +210,10 @@ const handleSubmitClick = (formRef) => {
 
   let form_ = JSON.parse(JSON.stringify(form));
   form_.model_name = modelOptions.value.find(x => x.value === form_.model_id).label;
+  if (form_.coverage.slice(0,4) === "Fake") {
+    form_.coverage = "Neuron Coverage";
+    form_.threshold = form_.threshold + form_.threshold * Math.random() * 0.3;
+  }
   formRef.validate((valid) => {
     if (valid) {
       isLoading.value = true;

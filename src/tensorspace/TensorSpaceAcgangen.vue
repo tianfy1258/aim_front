@@ -9,6 +9,7 @@
 
 <script setup>
 import * as TSP from 'tensorspace';
+import {BASE_URL} from "../network/request.js"
 import * as tf from "@tensorflow/tfjs"
 import {onMounted, ref, watch, watchEffect} from "vue";
 
@@ -46,7 +47,7 @@ onMounted(() => {
 
   model.load({
     type: "tfjs",
-    url: 'http://localhost:8000/getFile/acgangen.json',
+    url: `${BASE_URL}getFile/acgangen.json`,
     onProgress: function( fraction ) {
       loadingText.value = "模型加载进度：" + (fraction * 100).toFixed(2) + "%";
     },

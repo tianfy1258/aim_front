@@ -26,6 +26,7 @@
 
 <script setup>
 import * as TSP from 'tensorspace';
+import {BASE_URL} from "../network/request.js"
 import * as tf from "@tensorflow/tfjs"
 import result from "./imagenet_result.js"
 
@@ -86,7 +87,7 @@ onMounted(() => {
   }));
   model.load({
     type: "tensorflow",
-    url: "http://localhost:8000/getFile/alexnet.json",
+    url: `${BASE_URL}getFile/alexnet.json`,
     outputsName: ["norm1", "pool1", "norm2", "pool2", "conv3_1", "conv4_1", "conv5_1", "pool5", "Relu", "Relu_1", "Softmax"],
 
     onProgress: function (fraction) {
@@ -98,7 +99,7 @@ onMounted(() => {
   });
 
   model.init(function () {
-    fetch('http://localhost:8000/getFile/macaw.json',)
+    fetch(`${BASE_URL}getFile/macaw.json`,)
         .then(res => res.json())
         .then(data => {
           predict(data, model);

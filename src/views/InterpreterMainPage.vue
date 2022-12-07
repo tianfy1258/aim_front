@@ -120,7 +120,7 @@
     <el-col :span="16" v-loading="isLoading" >
       <el-row style="height: fit-content">
         <el-col>
-          <picture-viewer :image-info="response[0]"></picture-viewer>
+          <picture-viewer :image-info="response[0]" v-if="response.length > 0"></picture-viewer>
         </el-col>
       </el-row>
       <el-row>
@@ -130,7 +130,11 @@
     </el-col>
   </el-row>
 </template>
-
+<script>
+export default {
+  name: 'interpreter'
+}
+</script>
 <script setup>
 import {reactive, ref, watchEffect} from "vue";
 import OptionsIntegratedGradients from "../components/OptionsIntegratedGradients.vue";

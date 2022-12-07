@@ -11,7 +11,7 @@
       <template #content>
         判断神经元是否激活的阈值，大于该阈值的神经元视为激活的神经元，范围为0~1。
         <br>
-        默认值 0.75。 值越小，激活的标准越严格。
+        默认值 0.35。 值越小，激活的标准越严格。
       </template>
       <el-form-item label="激活阈值" prop="threshold">
         <el-input-number v-model="config.threshold" :min="0" :max="1" :precision="2"/>

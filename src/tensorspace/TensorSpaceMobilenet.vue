@@ -26,6 +26,7 @@
 
 <script setup>
 import * as TSP from 'tensorspace';
+import {BASE_URL} from "../network/request.js"
 import * as tf from "@tensorflow/tfjs"
 import result from "./imagenet_result.js"
 import {softmax} from "./alg.js";
@@ -100,7 +101,7 @@ onMounted(() => {
   model = buildModel();
   model.load({
     type: "keras",
-    url: "http://localhost:8000/getFile/mobilenet.json",
+    url: `${BASE_URL}getFile/mobilenet.json`,
     onProgress: function (fraction) {
       loadingText.value = "模型加载进度：" + (fraction * 100).toFixed(2) + "%";
     },

@@ -11,5 +11,11 @@ export default defineConfig({
   resolve:{
     extensions:['.vue','.js'],
     alias: [{ find: '@', replacement: resolve(__dirname, 'src') }],
-  }
+  },
+  // experimental: {
+  //   renderBuiltUrl(filename, {hostId, hostType, type}) {
+  //     console.log(`http://127.0.0.1:8000/assets/` + filename);
+  //     return `http://127.0.0.1:8000/assets/` + filename;
+  //   }
+  // }
 })

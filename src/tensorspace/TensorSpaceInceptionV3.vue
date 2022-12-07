@@ -26,6 +26,7 @@
 
 <script setup>
 import * as TSP from 'tensorspace';
+import {BASE_URL} from "../network/request.js"
 import * as tf from "@tensorflow/tfjs"
 import result from "./imagenet_result.js"
 
@@ -256,7 +257,7 @@ onMounted(() => {
     let conv2d_61 = new TSP.layers.Conv2d({ name: "conv2d_61" });
     conv2d_61.apply( mixed6 );
     let mixed7 = new TSP.layers.Concatenate([ conv2d_69, conv2d_64, conv2d_70, conv2d_61 ], {
-      name: "mixed7"
+      name: "mixed7",
     });
     // block 9
     let conv2d_73 = new TSP.layers.Conv2d({ name: "conv2d_73" });
@@ -356,7 +357,7 @@ onMounted(() => {
   model = buildModel();
   model.load({
     type: "keras",
-    url: "http://localhost:8000/getFile/inceptionv3.json",
+    url: `${BASE_URL}getFile/inceptionv3.json`,
     onProgress: function (fraction) {
       loadingText.value = "模型加载进度：" + (fraction * 100).toFixed(2) + "%";
     },

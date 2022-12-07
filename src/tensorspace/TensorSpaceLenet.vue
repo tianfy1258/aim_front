@@ -15,6 +15,7 @@
 
 <script setup>
 import * as TSP from 'tensorspace';
+import {BASE_URL} from "../network/request.js"
 import {onMounted, ref, watch} from "vue";
 import SignaturePad from "./signature_pad.js"
 const props = defineProps({
@@ -64,7 +65,7 @@ onMounted(() => {
   }));
   model.load({
     type: 'tfjs',
-    url: 'http://localhost:8000/getFile/mnist.json',
+    url: `${BASE_URL}getFile/mnist.json`,
     onProgress: function( fraction ) {
       loadingText.value = "模型加载进度：" + (fraction * 100).toFixed(2) + "%";
     },
@@ -73,7 +74,7 @@ onMounted(() => {
     }
   });
   model.init(function () {
-    fetch('http://localhost:8000/getFile/5.json',)
+    fetch(`${BASE_URL}getFile/5.json`,)
         .then(res => res.json())
         .then(data => {
           model.predict(data);

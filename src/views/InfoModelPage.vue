@@ -26,10 +26,11 @@
       <el-table-column prop="create_user__username" label="创建人" width="120"/>
       <el-table-column fixed="right" label="操作" width="120">
         <template #default="scope">
-          <el-link :href="`http://localhost:8000/assets/${scope.row.model_filename}.pt`" type="primary" size="small">
+          <el-link :href="`${DOWNLOAD_URL}assets/${scope.row.model_filename}.pt`" type="primary" size="small">
             下载
           </el-link>
-          <el-button v-if="scope.row.create_user__username !== 'system'" link style="margin-left: 10px;" type="danger" size="small" @click="handleDeleteClick(scope.row)">
+          <el-button v-if="scope.row.create_user__username !== 'system'" link style="margin-left: 10px;" type="danger"
+                     size="small" @click="handleDeleteClick(scope.row)">
             删除
           </el-button>
         </template>
@@ -51,15 +52,11 @@
   </div>
 </template>
 
-<script>
-import {computed, ref} from 'vue'</script>
 
 <script setup>
-
-import {request} from "../network/request";
-import {ref, watch} from "vue";
+import {ref} from 'vue'
+import {DOWNLOAD_URL, request} from "../network/request";
 import {sizeFormatter, timeFormatter} from "../utils/formatters";
-import {computed} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 
 

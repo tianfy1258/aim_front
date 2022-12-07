@@ -26,6 +26,7 @@
 
 <script setup>
 import * as TSP from 'tensorspace';
+import {BASE_URL} from "../network/request.js"
 import * as tf from "@tensorflow/tfjs"
 import result from "./imagenet_result.js"
 import {onMounted, ref, watch} from "vue";
@@ -177,7 +178,7 @@ onMounted(() => {
   model = buildModel();
   model.load({
     type: "keras",
-    url: "http://localhost:8000/getFile/resnet50.json",
+    url: `${BASE_URL}getFile/resnet50.json`,
     onProgress: function (fraction) {
       loadingText.value = "模型加载进度：" + (fraction * 100).toFixed(2) + "%";
     },

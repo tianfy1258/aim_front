@@ -47,7 +47,11 @@
     </el-col>
   </el-row>
 </template>
-
+<script>
+export default {
+  name: 'tensorspace'
+}
+</script>
 <script setup>
 import {computed, reactive, ref} from "vue";
 import {useStore} from "../pinia/index.js";
