@@ -1,7 +1,7 @@
 <template>
   <el-tabs id="loginTabs" v-loading="isLoading" @tab-click="tabClick" type="border-card" :class="{'login-tab':true, 'user':!isManager,'manager':isManager}" :stretch="true">
     <el-tab-pane label="Config" v-if="false">
-      <template #label> 用户入口</template>
+      <template #label > 用户入口</template>
       <login-form @is-loading="changeLoading" class="login-form" :is-manager="isManager"></login-form>
     </el-tab-pane>
     <el-tab-pane >
@@ -9,14 +9,15 @@
       <login-form @is-loading="changeLoading" class="login-form" :is-manager="isManager"></login-form>
     </el-tab-pane>
   </el-tabs>
-<!--  <div class="welcome-text">UAS环境感知模型可解释性测试</div>-->
-  <div class="welcome-text2">AI应用基础平台</div>
+  <div class="welcome-text">UAS环境感知模型可解释性测试</div>
+<!--  <div class="welcome-text2" v-if="VERSION === VERSION_MEASURE">AI数据质量度量系统</div>-->
+<!--  <div class="welcome-text2" v-else-if="VERSION === VERSION_PLATFORM">AI应用基础平台</div>-->
 </template>
 
 <script lang="ts" setup>
 import LoginForm from "../components/LoginForm.vue";
-import {ref} from "vue";
-
+import {computed, ref} from "vue";
+import {VERSION,VERSION_MEASURE,VERSION_PLATFORM} from "../utils/version"
 let isManager = ref(true);
 const tabClick = (pane, ev) => {
   isManager.value = pane.index === '1';

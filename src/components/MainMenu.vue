@@ -17,27 +17,32 @@
         <el-menu-item index="/main/datasets">数据集列表</el-menu-item>
         <el-menu-item index="/main/models">模型列表</el-menu-item>
       </el-sub-menu>
-      <el-sub-menu v-if="false" index="2"  v-show="isValid(['manager'])">
-        <template #title>
-          <el-icon>
-            <Setting/>
-          </el-icon>
-          配置管理
-        </template>
-        <el-menu-item index="/main/classifiers">待开发</el-menu-item>
-      </el-sub-menu>
-      <el-sub-menu v-if="false" index="3" v-show="isValid(['guest','manager'])">
+
+      <el-sub-menu v-if="setVersionVisible(VERSION_MEASURE)" index="2" v-show="isValid(['guest','manager'])">
         <template #title>
           <el-icon>
             <list/>
           </el-icon>
-          任务管理
+          模型质量度量
         </template>
-        <el-menu-item index="/main/tasks">任务列表</el-menu-item>
-        <el-menu-item index="/main/tasks/create"  v-show="isValid(['manager'])">任务创建</el-menu-item>
+        <el-menu-item index="/main/modelTaskCreate">发起任务</el-menu-item>
+        <el-menu-item index="/main/modelTaskList">任务查看</el-menu-item>
+        <el-menu-item index="/main/modelTaskConfig" v-if="false">任务配置</el-menu-item>
       </el-sub-menu>
 
-      <el-sub-menu index="4"  v-show="isValid(['manager'])">
+      <el-sub-menu v-if="setVersionVisible(VERSION_MEASURE)" index="3" v-show="isValid(['manager'])">
+        <template #title>
+          <el-icon>
+            <odometer/>
+          </el-icon>
+          数据质量度量
+        </template>
+        <el-menu-item index="/main/datasetTaskCreate">发起任务</el-menu-item>
+        <el-menu-item index="/main/datasetTaskList">任务查看</el-menu-item>
+        <el-menu-item index="/main/datasetTaskConfig" v-if="false">任务配置</el-menu-item>
+      </el-sub-menu>
+
+      <el-sub-menu v-if="setVersionVisible(VERSION_MEASURE)" index="4" v-show="isValid(['manager'])">
         <template #title>
           <el-icon>
             <odometer/>
@@ -45,6 +50,15 @@
           模型分析
         </template>
         <el-menu-item index="/main/interpreter">可解释分析</el-menu-item>
+      </el-sub-menu>
+
+      <el-sub-menu v-if="setVersionVisible(VERSION_PLATFORM)" index="5" v-show="isValid(['manager'])">
+        <template #title>
+          <el-icon>
+            <odometer/>
+          </el-icon>
+          模型分析
+        </template>
         <el-menu-item index="/main/coverage">覆盖测试</el-menu-item>
         <el-menu-item index="/main/tensorSpace">可视化展示</el-menu-item>
       </el-sub-menu>
@@ -58,6 +72,8 @@
 import {Menu as IconMenu, Odometer, Setting,List} from '@element-plus/icons-vue'
 import MainToolbar from "./MainToolbar";
 import {isValid} from "../utils/valid";
+import {VERSION,VERSION_MEASURE,VERSION_PLATFORM,setVersionVisible} from "../utils/version"
+
 </script>
 
 <style scoped>

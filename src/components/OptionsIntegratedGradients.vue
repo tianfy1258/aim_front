@@ -50,7 +50,6 @@ const methodOptions = ref(["riemann_right","riemann_left","riemann_middle","riem
 const config = reactive({
   n_steps: 50,
   method: "gausslegendre",
-
 });
 const emits = defineEmits(['change']);
 watch(config,(n,o) => {

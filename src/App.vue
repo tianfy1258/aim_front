@@ -2,19 +2,22 @@
 
 import {reactive} from "vue";
 import {useStore} from './pinia'
-
+const store = useStore();
 let VUE_STORE = JSON.parse(localStorage.getItem("VUE_STORE"));
 if (VUE_STORE) {
   VUE_STORE = reactive(VUE_STORE);
+  store.$state = VUE_STORE;
 } else {
   VUE_STORE = reactive({});
+  store.$reset();
 }
-const store = useStore();
-store.$state = VUE_STORE;
+
 // 每当它发生变化时，将整个状态持久化到本地存储
 window.addEventListener("beforeunload", () => {
-  localStorage.setItem("VUE_STORE", JSON.stringify(store.$state))
-})
+  if (!store.logout) {
+    localStorage.setItem("VUE_STORE", JSON.stringify(store.$state));
+  }
+});
 </script>
 
 <template>

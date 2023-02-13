@@ -9,6 +9,11 @@ const InfoModelPage = () => import('../views/InfoModelPage')
 const InterpreterMainPage = () => import('../views/InterpreterMainPage')
 const CoverageMainPage = () => import('../views/CoverageMainPage')
 const TensorSpaceMainPage = () => import('../views/TensorSpaceMainView')
+const DatasetTaskCreatePage = () => import('../views/DatasetTaskCreatePage')
+const DatasetTaskListPage = () => import('../views/DatasetTaskListPage')
+const ModelTaskCreatePage = () => import('../views/ModelTaskCreatePage')
+const ModelTaskListPage = () => import('../views/ModelTaskListPage')
+
 
 const routes = [
   {path: '/', name: "", redirect: "/login"},
@@ -19,6 +24,12 @@ const routes = [
       {path: 'datasets', name: "datasets", meta: {title: "数据集列表"}, component: InfoDatasetPage},
       {path: 'upload', name: 'upload', meta: {title: '文件上传'}, component: UploadPage},
       {path: 'models', name: "models", meta: {title: '模型列表'}, component: InfoModelPage},
+      {path: 'datasetTaskCreate', name: "datasetTaskCreate", meta: {title: '发起任务'}, component: DatasetTaskCreatePage},
+      {path: 'datasetTaskList', name: "datasetTaskList", meta: {title: '任务查看'}, component: DatasetTaskListPage},
+      {path: 'datasetTaskConfig', name: "datasetTaskConfig", meta: {title: '任务配置'}, component: InfoModelPage},
+      {path: 'modelTaskCreate', name: "modelTaskCreate", meta: {title: '发起任务'}, component: ModelTaskCreatePage},
+      {path: 'modelTaskList', name: "modelTaskList", meta: {title: '任务查看'}, component: ModelTaskListPage},
+      {path: 'modelTaskConfig', name: "modelTaskConfig", meta: {title: '任务配置'}, component: InfoModelPage},
       {path: 'interpreter', name: "interpreter", meta: {title: '可解释性分析',keepAlive:true}, component: InterpreterMainPage},
       {path: 'coverage', name: "coverage", meta: {title: '覆盖测试',keepAlive:true}, component: CoverageMainPage},
       {path: 'tensorSpace', name: "tensorSpace", meta: {title: '可视化展示',keepAlive:true}, component: TensorSpaceMainPage}

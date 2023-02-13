@@ -107,6 +107,7 @@ const onSubmit = (formRef) => {
         data: form,
       }).then((res) => {
         store.$patch({user: res.user});
+        store.LOGIN();
         localStorage.setItem("token", res.token);
         localStorage.setItem("token_time", new Date().getTime().toString());
         $router.push("/main").finally(() => {

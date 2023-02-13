@@ -18,14 +18,15 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="归因方法" prop="attribution">
+        <el-form-item label="归因方法" prop="attribution" >
           <el-select v-model="form.attribution"
+                     style="width: 300px"
                      placeholder="请选择">
             <el-option
                 v-for="item in attributionOptions"
                 :key="item"
-                :label="item"
-                :value="item"
+                :label="item.label"
+                :value="item.value"
             />
           </el-select>
         </el-form-item>
@@ -58,8 +59,8 @@
             <el-option
                 v-for="item in visualizeOptions"
                 :key="item"
-                :label="item"
-                :value="item"
+                :label="item.label"
+                :value="item.value"
             />
           </el-select>
         </el-form-item>
@@ -70,8 +71,8 @@
             <el-option
                 v-for="item in signOptions"
                 :key="item"
-                :label="item"
-                :value="item"
+                :label="item.label"
+                :value="item.value"
             />
           </el-select>
         </el-form-item>
@@ -144,9 +145,22 @@ import OptionsNoiseTunnel from "../components/OptionsNoiseTunnel.vue";
 import PictureViewer from "../components/PictureViewer.vue";
 import InterpreterCacheTable from "../components/InterpreterCacheTable.vue";
 
-let attributionOptions = ref(['Integrated Gradients', "Saliency", "DeepLift", "Occlusion"]);
-let visualizeOptions = ref(['heat_map', 'blended_heat_map']);
-let signOptions = ref(['positive', 'negative', 'absolute_value', 'all']);
+let attributionOptions = ref([
+    {label:'Integrated Gradients (积分梯度)',value:'Integrated Gradients'},
+    {label:'Saliency (显著性)',value:"Saliency"},
+    {label:'DeepLift (可解释提升)',value:'DeepLift'},
+    {label:'Occlusion (遮罩法)',value:'Occlusion'},
+  ]);
+let visualizeOptions = ref([
+  {label:'热力图',value:'heat_map'},
+  {label:'混合图片热力图',value:"blended_heat_map"}
+]);
+let signOptions = ref([
+  {label:'显示正值',value:'positive'},
+  {label:'显示负值',value:"negative"},
+  {label:'显示绝对值',value:"absolute_value"},
+  {label:'显示正值和负值',value:"all"},
+]);
 let sampleOptions = ref([{label: "随机采样", value: "random"}, {label: "指定图片", value: "custom"}]);
 let datasetOptions = ref([]);
 let modelOptions = ref([]);

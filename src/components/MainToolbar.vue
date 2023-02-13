@@ -42,6 +42,7 @@ const logout = () => {
         grouping: true,
         type: 'info',
       });
+      store.LOGOUT();
       localStorage.removeItem("token");
       localStorage.removeItem("VUE_STORE");
       localStorage.removeItem("token_time");
