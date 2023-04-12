@@ -30,6 +30,26 @@
 import {reactive, ref} from 'vue';
 import {request} from "../network/request";
 
+let datasetOptions = ref([]);
+const getDatasetOptions = () => {
+  request({
+    url: "getDatasetOptions",
+    method: 'POST',
+    data: {
+      pageSize: 100000,
+      filter: {
+        "hashcode": props.response.hashcode
+      }
+    }
+  }).then((res) => {
+    datasetOptions.value = res.data.map((x) => ({
+      value: x.dataset_id,
+      label: x.dataset_name,
+      instances: x.dataset_instances,
+    }));
+  })
+}
+getDatasetOptions();
 const emit = defineEmits(["finish"]);
 const props = defineProps({
   response: {
@@ -41,6 +61,7 @@ let form = reactive({
   db_instances: props.response.db_instances,
   db_tags_num: props.response.db_tags_num,
   db_tags: props.response.db_tags,
+  hashcode: props.response.hashcode,
   csv_path: props.response.csv_path,
   zip_path: props.response.zip_path,
   db_name: "",

@@ -220,7 +220,7 @@ const handleSubmitClick = (formRef) => {
       isLoginButtonValid.value = false;
       setTimeout(() => {
         currentIndex = 0;
-        taskStatusInterval = setInterval(getTaskStatus, 500);
+        taskStatusInterval = setInterval(getTaskStatus, 1000);
       }, 1000);
       request({
         url: "coverage",

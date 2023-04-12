@@ -9,9 +9,10 @@
       <login-form @is-loading="changeLoading" class="login-form" :is-manager="isManager"></login-form>
     </el-tab-pane>
   </el-tabs>
-  <div class="welcome-text">UAS环境感知模型可解释性测试</div>
-<!--  <div class="welcome-text2" v-if="VERSION === VERSION_MEASURE">AI数据质量度量系统</div>-->
-<!--  <div class="welcome-text2" v-else-if="VERSION === VERSION_PLATFORM">AI应用基础平台</div>-->
+<!--  <div class="welcome-text">UAS环境感知模型可解释性测试</div>-->
+  <div class="welcome-text2" v-if="VERSION === VERSION_MEASURE">AI数据质量度量系统</div>
+  <div class="welcome-text2" v-else-if="VERSION === VERSION_PLATFORM">AI应用基础平台</div>
+  <div class="welcome-text2" v-else >ALL</div>
 </template>
 
 <script lang="ts" setup>

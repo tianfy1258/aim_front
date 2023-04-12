@@ -5,6 +5,7 @@
                id="InterpreterMainPageForm"
                :model="form"
                :rules="rules"
+               v-loading="isLoading"
                label-width="120px"
                style="width:600px">
 
@@ -22,9 +23,24 @@
                         :options="datasetOptions"
                         filterable
                         placeholder="请选择">
-
           </el-select-v2>
         </el-form-item>
+        <el-form-item label="使用样本数" prop="sample">
+          <div style="display: flex;">
+            <el-slider style="width: 350px" v-model="form.sample_rate" :step="0.1" :min="0.1" :max="100"/>
+            <div style="width: 100px" v-show="form.dataset_id">{{ sample_count }}</div>
+          </div>
+        </el-form-item>
+        <el-form-item label="随机数种子" prop="enable_random">
+          <el-radio-group v-model="form.enable_random">
+            <el-radio :label="true">是</el-radio>
+            <el-radio :label="false">否</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="随机数种子" prop="random_seed" v-show="form.enable_random">
+          <el-input-number v-model="form.random_seed" :min="0" :max="10000" :step="1"></el-input-number>
+        </el-form-item>
+
 
         <el-form-item label="测试模型" prop="model_id">
           <el-select v-model="form.model_id"
@@ -38,14 +54,14 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="度量方法" prop="method_list">
-          <el-checkbox-group class="checkboxGroup" v-model="form.method_list">
-            <el-checkbox v-for="item in measure_methods" :label="item.label">{{item.label}}</el-checkbox>
+        <el-form-item label="度量方法" prop="method_list" v-show="false">
+          <el-checkbox-group class="checkboxGroup" disabled v-model="form.method_list">
+            <el-checkbox v-for="item in measure_method" :label="item.label">{{ item.label }}</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
 
         <el-form-item>
-          <el-button @click="handleSubmitClick(formRef)" style="width: 200px"
+          <el-button @click="onSubmit(formRef)" style="width: 200px"
                      type="primary">
             开始任务
           </el-button>
@@ -59,7 +75,7 @@
 
 </script>
 <script setup>
-import {reactive, ref, watchEffect} from "vue";
+import {computed, reactive, ref, watchEffect} from "vue";
 import {request} from "../network/request.js";
 import {ElMessage} from "element-plus";
 import {useStore} from '../pinia/index'
@@ -68,20 +84,17 @@ import {useRouter} from "vue-router";
 const router = useRouter();
 const store = useStore()
 
-let measure_methods = ref([
-  {label:"准确性测试",value:"acc"},
-  {label:"鲁棒性测试",value:"lb"},
-  {label:"公平性测试",value:"gp"},
-])
-
 const formRef = ref(null);
 const form = reactive({
-  task_name:"",
-  task_description:"",
-  method_list:[],
-  dataset_id:"",
-  model_id:""
-
+  task_name: "",
+  task_description: "",
+  method_list: ["准确率", "精确率", "召回率", "误报率"],
+  dataset_id: "",
+  model_id: "",
+  enable_random: false,
+  random_seed: 0,
+  sample_rate: 1,
+  sample_count: -1,
 });
 const rules = reactive({
   task_name: [
@@ -118,7 +131,7 @@ const getDatasetOptions = () => {
     }
   }).then((res) => {
     datasetOptions.value = res.data.map((x) => ({
-      value: x.dataset_name,
+      value: x.dataset_id,
       label: x.dataset_name,
       instances: x.dataset_instances,
     }));
@@ -133,7 +146,7 @@ const getModelOptions = () => {
     }
   }).then((res) => {
     modelOptions.value = res.data.map((x) => ({
-      value: x.model_name,
+      value: x.model_id,
       label: x.model_name,
     }))
   })
@@ -141,36 +154,47 @@ const getModelOptions = () => {
 getModelOptions();
 getDatasetOptions();
 
+const measure_method = ref([
+  {label: "准确率", value: "acc"},
+  {label: "精确率", value: "precision"},
+  {label: "召回率", value: "recall"},
+  {label: "误报率", value: "false_positive_rate"}
+]);
+
+const sample_count = computed(() => {
+  let dataset = datasetOptions?.value?.find(x => x.value === form.dataset_id);
+  return dataset ? Math.round(form.sample_rate * 0.01 * dataset.instances) : 0;
+})
 
 let isLoginButtonValid = ref(true);
 let isLoading = ref(false);
 let response = ref([]);
-const handleSubmitClick = (formRef, useCurrent) => {
-  if (!formRef || !isLoginButtonValid.value) {
-    return;
-  }
-  let form_ = JSON.parse(JSON.stringify(form));
+
+const onSubmit = (formRef) => {
+  if (!formRef || !isLoginButtonValid.value) return
   formRef.validate((valid) => {
     if (valid) {
-      isLoading.value = true;
-      isLoginButtonValid.value = false;
-      setTimeout(() => {
-        ElMessage({
-          message: "提交成功",
-          type: "success"
-        })
-        isLoginButtonValid.value = true;
-        isLoading.value = false;
-        form_.task_id = store.modelList.length > 0 ?
-            store.modelList[store.modelList.length - 1].task_id + 1 :
-            1;
-        form_.task_status = "执行中";
-        form_.create_time = new Date();
-        form_.create_user__username = "root";
-        store.ADD_ITEM_MODEL(form_);
-        router.push("/main/modelTaskList");
-      }, Math.min(1000, Math.max(300, 1000 * Math.random())));
 
+      form.sample_count = sample_count.value;
+      isLoginButtonValid.value = false;
+      isLoading.value = true;
+      request({
+        url: "createModelMeasurementTask",
+        method: "POST",
+        data: form,
+      }).then((res) => {
+        ElMessage({
+          type: 'success',
+          message: '创建成功 ' + res.task_id,
+        });
+
+      }).catch((err) => {
+      })
+          .finally(() => {
+            isLoginButtonValid.value = true;
+            isLoading.value = false;
+            router.push('/main/modelTaskList')
+          })
     } else {
       return false
     }
