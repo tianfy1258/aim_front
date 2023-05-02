@@ -33,6 +33,7 @@ import result from "./imagenet_result.js"
 import {onMounted, ref, watch} from "vue";
 import {request} from "../network/request.js";
 import {ElMessage} from "element-plus";
+const emits = defineEmits(['changeModel']);
 
 const props = defineProps({
   data: {
@@ -106,10 +107,13 @@ onMounted(() => {
         });
     isLoading.value = false;
   });
-
+  emits("changeModel", model);
 
 });
+import {useStore} from "../pinia/index.js";
+const store = useStore();
 const getImage = () => {
+  store.CAPTURE_VALID();
   request({
     url: "getJsonImage",
     params:{
@@ -125,7 +129,23 @@ const getImage = () => {
     });
     label.value = res.label;
     predict(res.data, model);
+    store.SET_TENSORSPACE_STATE({
+      input: {
+        type: "image",
+        value: res.data,
+      },
+      output: {
+        type: "text",
+        value: `
+          名称：${res.filename}@
+          标签：${label.value}@
+          预测标签：${predict_label.value}@
+          置信度：${output.value}@
+        `,
+      }
+    });
   });
+
 }
 watch(props.data, (val) => {
   let randomData = tf.randomNormal([1, 100]).dataSync();

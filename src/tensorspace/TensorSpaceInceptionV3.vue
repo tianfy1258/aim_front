@@ -33,6 +33,7 @@ import result from "./imagenet_result.js"
 import {onMounted, ref, watch} from "vue";
 import {request} from "../network/request.js";
 import {ElMessage} from "element-plus";
+const emits = defineEmits(['changeModel']);
 
 const props = defineProps({
   data: {
@@ -51,7 +52,6 @@ let label = ref("");
 
 const predict = (data, model) => {
   model.predict([data], (val) => {
-    console.log(val);
     let max = Math.max(...val);
     let index = val.indexOf(max);
     output.value = max;
@@ -369,16 +369,18 @@ onMounted(() => {
   model.init(function () {
     isLoading.value = false;
   });
-
-
+  emits("changeModel", model);
 });
+import {useStore} from "../pinia/index.js";
+import {scale} from "../utils/scale.js";
+const store = useStore();
 const getImage = () => {
+  store.CAPTURE_VALID();
   request({
     url: "getJsonImage",
     params:{
       width:299,
       height:299,
-      scale:true,
     },
     method: "get",
   }).then(res => {
@@ -388,7 +390,23 @@ const getImage = () => {
       type: 'success',
     });
     label.value = res.label;
-    predict(res.data, model);
+    let arr = scale(res.data);
+    predict(arr, model);
+    store.SET_TENSORSPACE_STATE({
+      input: {
+        type: "image",
+        value: res.data,
+      },
+      output: {
+        type: "text",
+        value: `
+          名称：${res.filename}@
+          标签：${label.value}@
+          预测标签：${predict_label.value}@
+          置信度：${output.value}@
+        `,
+      }
+    });
   });
 }
 watch(props.data, (val) => {

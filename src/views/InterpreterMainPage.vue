@@ -86,7 +86,7 @@
           </el-select-v2>
         </el-form-item>
 
-        <el-form-item label="采样方法" prop="sample">
+        <el-form-item label="采样方法" prop="sample" v-show="false">
           <el-select v-model="form.sample_method"
                      placeholder="请选择">
             <el-option

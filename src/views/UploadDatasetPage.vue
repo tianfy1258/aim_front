@@ -151,7 +151,6 @@ const handleErrorUpload = (res) => {
 };
 const handleChange = (file, files) => {
   fileCountCurrent = files.length;
-  console.log(fileCountCurrent);
 
 }
 const submitUpload = () => {

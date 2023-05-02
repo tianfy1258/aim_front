@@ -12,6 +12,7 @@ import * as TSP from 'tensorspace';
 import {BASE_URL} from "../network/request.js"
 import * as tf from "@tensorflow/tfjs"
 import {onMounted, ref, watch, watchEffect} from "vue";
+const emits = defineEmits(['changeModel']);
 
 const props = defineProps({
   data: {
@@ -63,15 +64,48 @@ onMounted(() => {
     model.predict([randomData, [0]]);
     isLoading.value = false;
   });
-
+  emits("changeModel", model);
 
 });
 const clear = () => {
   model.clear();
 }
+import {useStore} from "../pinia/index.js";
+import result from "./imagenet_result.js";
+const store = useStore();
+const float32ArrayToUint8List = (float32Array) => {
+  const length = float32Array.length;
+  const uint8List = new Array(length);
+
+  for (let i = 0; i < length; i++) {
+    uint8List[i] = Math.floor(((float32Array[i] + 1) / 2) * 255);
+  }
+
+  return uint8List;
+}
+
+let r = null;
 watch(props.data, (val) => {
+  if (val.number < 10 && val.number >= 0) {
+    store.CAPTURE_VALID();
+  }
   let randomData = tf.randomNormal([1, 100]).dataSync();
-  model.predict([randomData, [val.number]]);
+  model.predict([randomData, [val.number]], (val) => {
+    r = float32ArrayToUint8List(val);
+  });
+  store.SET_TENSORSPACE_STATE({
+    output: {
+      type: "image",
+      value: r,
+    },
+    input: {
+      type: "text",
+      value: `
+          标签：${val.number}
+        `,
+    }
+  });
+
 });
 
 watch(loadingText,value => {

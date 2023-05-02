@@ -62,8 +62,6 @@
         <el-menu-item index="/main/coverage">覆盖测试</el-menu-item>
         <el-menu-item index="/main/tensorSpace">可视化展示</el-menu-item>
       </el-sub-menu>
-
-
     </el-menu>
   </el-aside>
 </template>

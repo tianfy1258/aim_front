@@ -1,6 +1,6 @@
 <template>
   <el-row>
-    <el-col :span="8">
+    <el-col :span="10">
       <el-form ref="formRef"
                id="InterpreterMainPageForm"
                :model="form"
@@ -35,21 +35,35 @@
         <!--          <div v-else>无</div>-->
         <!--        </el-form-item>-->
 
-        <el-tooltip
-            class="box-item"
-            effect="dark"
-            placement="right"
-        >
-          <template #content>
-            判断神经元是否激活的阈值，大于该阈值的神经元视为激活的神经元，范围为0~1。
-            <br>
-            默认值 0.75。 值越小，激活的标准越严格。
-          </template>
-          <el-form-item label="激活阈值" prop="threshold">
-            <el-input-number v-model="form.threshold" :min="0" :max="1" :precision="2" :step="0.05"/>
-          </el-form-item>
-        </el-tooltip>
+        <el-form-item label="激活阈值" prop="threshold" v-if="form.coverage === 'NC'">
+          <el-input-number v-model="form.threshold" :min="0" :max="1" :precision="2" :step="0.05"/>
+        </el-form-item>
+        <el-form-item label="激活阈值" prop="threshold" v-if="form.coverage === 'SNAC'">
+          <el-input-number v-model="form.max_threshold" :min="-10000000" :max="10000000" :precision="2"
+                           :step="1" style="width: 200px;"/>
+        </el-form-item>
+        <el-form-item label="激活比例" prop="threshold" v-else-if="form.coverage === 'TKNC'">
+          <el-input-number v-model="form.threshold" :min="0" :max="1" :precision="2" :step="0.05"/>
+        </el-form-item>
+        <el-form-item label="激活区间" prop="asd" v-else-if="form.coverage === 'NBC'">
+          <div
+              style="display:flex;align-self: flex-end;justify-content: flex-start ;flex-direction: column;height: 70px;">
+            <div>
+              <span>小于&nbsp;</span>
+              <el-input-number v-model="form.min_threshold" :min="-10000000" :max="10000000" :precision="2"
+                               :step="1" style="width: 200px;"/>
+            </div>
+            <div style="margin-top: 10px;">
+              <span>大于&nbsp;</span>
+              <el-input-number v-model="form.max_threshold" :min="-10000000" :max="10000000" :precision="2"
+                               :step="1" style="width: 200px;"/>
+            </div>
+          </div>
+        </el-form-item>
 
+        <el-form-item label="参数说明">
+          <div style="text-align:left;" v-html="introduceText"></div>
+        </el-form-item>
         <el-form-item label="数据集" prop="dataset_id" id="DatasetSelect">
           <el-select-v2 v-model="form.dataset_id"
                         :options="datasetOptions"
@@ -74,10 +88,16 @@
             开始任务
           </el-button>
         </el-form-item>
+        <el-form-item>
+          <el-button @click="handleStopClick" style="width: 200px"
+                     type="danger">
+            终止任务
+          </el-button>
+        </el-form-item>
       </el-form>
 
     </el-col>
-    <el-col :span="16" v-loading="isLoading">
+    <el-col :span="13" v-loading="isLoading">
       <el-row>
         <coverage-line-chart :data="chartData"></coverage-line-chart>
       </el-row>
@@ -104,23 +124,20 @@ export default {
 }
 </script>
 <script setup>
-import {computed, reactive, ref} from "vue";
+import {computed, reactive, ref, watchEffect} from "vue";
 import {request} from "../network/request.js";
 import md5 from "../utils/md5.js";
 import {useStore} from "../pinia/index.js";
 import CoverageLineChart from "../echarts/CoverageLineChart.vue";
+import {ElMessage} from "element-plus";
 
 const store = useStore();
 
 let coverageOptions = ref([
-  {label: "神经元覆盖", value: "Neuron Coverage"},
-  {label: " k-多段神经元覆盖", value: "Fake_1"},
-  {label: "神经元边界覆盖", value: "Fake_2"},
-  {label: "强神经元激活覆盖", value: "Fake_3"},
-  {label: "连接覆盖", value: "Fake_4"},
-  {label: "路径覆盖", value: "Fake_5"},
-  {label: "图元素覆盖", value: "Fake_6"},
-  {label: "图结构覆盖", value: "Fake_7"},
+  {label: "神经元覆盖", value: "NC"},
+  {label: "强神经元覆盖", value: "SNAC"},
+  {label: " topk神经元覆盖", value: "TKNC"},
+  {label: "神经元边界覆盖", value: "NBC"},
 ]);
 let datasetOptions = ref([]);
 let modelOptions = ref([]);
@@ -160,13 +177,16 @@ getDatasetOptions();
 
 const formRef = ref(null);
 const form = reactive({
-  coverage: "Neuron Coverage",
-  model_id: 10,
+  coverage: "NC",
+  model_id: 1,
   options: {},
-  threshold: 0.35,
+  threshold: 0.75,
+  // k: 3,
   dataset_id: 5576,
   sample_rate: 1,
   sample_count: -1,
+  min_threshold: -10,
+  max_threshold: 10,
   task_key: null,
 });
 const sample_count = computed(() => {
@@ -197,12 +217,13 @@ const rules = reactive({
   ],
 })
 
-let isLoginButtonValid = ref(true);
+let isButtonValid = ref(true);
 let isLoading = ref(false);
 let response = ref([]);
 let taskStatusInterval = null;
+let taskTimeout = null;
 const handleSubmitClick = (formRef) => {
-  if (!formRef || !isLoginButtonValid.value) {
+  if (!formRef || !isButtonValid.value) {
     return;
   }
   form.task_key = md5("" + new Date().getTime() + store.user.username);
@@ -210,18 +231,23 @@ const handleSubmitClick = (formRef) => {
 
   let form_ = JSON.parse(JSON.stringify(form));
   form_.model_name = modelOptions.value.find(x => x.value === form_.model_id).label;
-  if (form_.coverage.slice(0,4) === "Fake") {
-    form_.coverage = "Neuron Coverage";
+  if (form_.coverage.slice(0, 4) === "Fake") {
+    form_.coverage = "NC";
     form_.threshold = form_.threshold + form_.threshold * Math.random() * 0.3;
+  }
+  if (form_.max_threshold < form_.min_threshold) {
+    ElMessage.error("最大阈值不能小于最小阈值");
+    return;
   }
   formRef.validate((valid) => {
     if (valid) {
       isLoading.value = true;
-      isLoginButtonValid.value = false;
-      setTimeout(() => {
+      isButtonValid.value = false;
+      taskTimeout = setTimeout(() => {
         currentIndex = 0;
-        taskStatusInterval = setInterval(getTaskStatus, 1000);
-      }, 1000);
+        taskStatusInterval = setInterval(getTaskStatus, 2000);
+      }, 3000);
+      interrupted.value = false;
       request({
         url: "coverage",
         method: "POST",
@@ -230,9 +256,11 @@ const handleSubmitClick = (formRef) => {
       }).then((res) => {
         response.value = res.data;
       }).catch((err) => {
+        // clear timeout
+        clearTimeout(taskTimeout);
         clearInterval(taskStatusInterval);
       }).finally(() => {
-        isLoginButtonValid.value = true;
+        isButtonValid.value = true;
         isLoading.value = false;
         // clearInterval(taskStatusInterval);
       });
@@ -248,12 +276,18 @@ let task_process = ref(0);
 let task_result = ref(0.);
 let task_total = ref(0);
 let _res_finished = ref(false);
+let interrupted = ref(false);
 let task_status = computed(() => {
+  if (form.task_key === null) {
+    return "未开始"
+  }
+  if (interrupted.value) {
+    return "已终止";
+  }
   if (!_res_finished.value) {
     return "正在运行"
-  }
-  if (_res_finished.value) {
-    return "已完成"
+  } else if (_res_finished.value) {
+    return "已完成";
   }
 });
 
@@ -298,7 +332,65 @@ const getTaskStatus = () => {
     isLoading.value = false;
   });
 }
+const handleStopClick = () => {
+  clearInterval(taskStatusInterval);
+  request({
+    url: "terminateCoverageTask",
+    method: "GET",
+    params: {
+      task_key: form.task_key,
+    }
+  }).then((res) => {
+    interrupted.value = true;
 
+    ElMessage({
+      message: "任务已终止",
+      type: "success",
+    });
+  })
+}
+
+const introduceText = computed(() => {
+  if (form.coverage === "NC") {
+    return `
+    神经元归一化取值
+    </br>
+    判断神经元是否激活的阈值，大于该阈值的神经元视为激活的神经元。
+    </br>
+    范围为0~1。默认值 0.75。 值越小，激活的标准越严格。
+    `
+  } else if (form.coverage === "TKNC") {
+    return `
+    每次固定激活最强神经元的百分比。</br>
+    范围为0~1。默认值 0.05。值越小，激活的标准越严格。</br>
+    （0.05 即每次激活强度在前5%的神经元）
+    `
+  } else if (form.coverage === "NBC") {
+    return `
+    神经元真实取值
+    </br>
+    判断神经元是否激活的阈值，激活取值边界两端的区间。</br>
+    默认值 <-10 >10。 区间范围越大，激活的标准越严格。</br>
+    `
+  } else if (form.coverage === "SNAC") {
+    return `
+    神经元真实取值
+    </br>
+    判断神经元是否激活的阈值，大于该阈值的神经元视为激活的神经元。
+    </br>
+    默认值 10。 值越小，激活的标准越严格。
+    `
+  }
+  return "";
+});
+// use watchEffect, set threshold by coverage
+watchEffect(() => {
+  if (form.coverage === "TKNC") {
+    form.threshold = 0.05;
+  }else if (form.coverage === "NC") {
+    form.threshold = 0.75;
+  }
+});
 </script>
 
 <style scoped>

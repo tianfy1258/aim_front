@@ -94,7 +94,6 @@ const emit = defineEmits(["isLoading"]);
 
 
 const onSubmit = (formRef) => {
-  console.log(props.isManager, props);
   if (!formRef || !isLoginButtonValid.value) return
   formRef.validate((valid) => {
     if (valid) {

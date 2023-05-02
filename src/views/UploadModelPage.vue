@@ -75,7 +75,6 @@ let isLoading = ref(false);
 
 let tempFileList = [];
 const handleBeforeUpload = (rawFile) => {
-  console.log(rawFile)
   let filetype = rawFile.name.slice(-3)
   if (filetype.startsWith(".")) {
     filetype = filetype.slice(-2)
@@ -149,7 +148,6 @@ const handleErrorUpload = (res) => {
 };
 const handleChange = (file, files) => {
   fileCountCurrent = files.length;
-  console.log(fileCountCurrent);
 
 }
 const submitUpload = () => {
@@ -163,7 +161,6 @@ const submitUpload = () => {
   }
   validToken().then(response => {
     uploadToken.value = new Date().getTime().toString();
-    console.log("upload");
     upload.value.submit();
   });
 

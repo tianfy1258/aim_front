@@ -12,21 +12,33 @@ export const useStore = () => {
         datasetList: [
         ],
         modelList: [],
+        tensorSpace:{
+          input:{
+            type:"image",
+            value: null,
+          },
+          output:{
+            type:"image",
+            value: null,
+          }
+        },
+        captureValid: false,
       }
     },
     actions: {
-      ADD_ITEM_DATASET(item) {
-        this.datasetList.push(item);
+      SET_TENSORSPACE_STATE(value) {
+        this.tensorSpace = value;
       },
-      REMOVE_ITEM_DATASET(item) {
-        this.datasetList = this.datasetList.filter(x => x.task_id !== item.task_id);
+      REMOVE_TENSORSPACE_STATE() {
+        this.tensorSpace = {};
       },
-      ADD_ITEM_MODEL(item) {
-        this.modelList.push(item);
+      CAPTURE_VALID() {
+        this.captureValid = true;
       },
-      REMOVE_ITEM_MODEL(item) {
-        this.modelList = this.modelList.filter(x => x.task_id !== item.task_id);
+      CAPTURE_INVALID() {
+        this.captureValid = false;
       },
+
       LOGOUT() {
         this.logout = true;
       },

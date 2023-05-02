@@ -31,9 +31,13 @@ let model = null;
 let signaturePad = null;
 let isLoading = ref(false);
 let loadingText = ref("");
+const emits = defineEmits(['changeModel']);
+import {useStore} from "../pinia/index.js";
+const store = useStore();
 onMounted(() => {
   isLoading.value = true;
   const getImage = () => {
+    store.CAPTURE_VALID();
     let canvas = padRef.value;
     let context = canvas.getContext( '2d' );
     let imgData = context.getImageData( 0, 0, canvas.width, canvas.height );
@@ -43,7 +47,24 @@ onMounted(() => {
         signatureData.push( imgData.data[ 896 * i + j ] / 255 );
       }
     }
-    model.predict( signatureData );
+    let r = null;
+    model.predict(signatureData,
+        (val) => {
+          r = val.indexOf(Math.max(...val));
+        }
+    );
+    store.SET_TENSORSPACE_STATE({
+      input: {
+        type: "image",
+        value: canvas.toDataURL("image/jpeg"),
+      },
+      output: {
+        type: "text",
+        value: `
+          预测标签：${r}
+        `,
+      }
+    });
   }
   signaturePad = new SignaturePad(padRef.value, {
     minWidth: 10,
@@ -51,7 +72,6 @@ onMounted(() => {
     onEnd: getImage
   });
   model = new TSP.models.Sequential(chartRef.value);
-
   model.add(new TSP.layers.GreyscaleInput());
   model.add(new TSP.layers.Padding2d());
   model.add(new TSP.layers.Conv2d());
@@ -78,9 +98,10 @@ onMounted(() => {
         .then(res => res.json())
         .then(data => {
           model.predict(data);
-        });
+        }).finally(() => clear());
     isLoading.value = false;
   });
+  emits('changeModel', model);
 
 });
 const clear = () => {

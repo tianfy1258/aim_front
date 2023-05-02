@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="flex-container">
+    <div class="flex-container" id="visualization">
       <el-button id="prevButton" @click="backToIndexZero">重新选择上传类型</el-button>
       <el-steps :active="active_index" class="flex-item" align-center finish-status="success"
                 style="margin-bottom: 50px;margin-top: 20px;">
@@ -22,6 +22,10 @@
     <upload-dataset-finish-page v-else-if="active_index ===3 && uploadType === 'dataset'"></upload-dataset-finish-page>
     <upload-model-finish-page v-else-if="active_index ===3 && uploadType === 'model'"></upload-model-finish-page>
   </div>
+
+
+
+
 </template>
 
 <script setup>
@@ -57,6 +61,8 @@ const backToIndexZero = () => {
   proxy.$unFocus();
   uploadType.value = "";
 }
+
+
 </script>
 
 

@@ -1,14 +1,15 @@
 <template>
-  <el-row >
+  <el-row>
     <el-col :span="6">
       <el-form ref="formRef"
                id="InterpreterMainPageForm"
                :model="form"
                :rules="rules"
                label-width="120px"
-               >
+      >
         <el-form-item label="测试模型" prop="model_id">
           <el-select v-model="form.model_id"
+                     @change="changeSelectModel"
                      placeholder="请选择">
             <el-option
                 v-for="item in modelOptions"
@@ -25,24 +26,54 @@
           </el-radio-group>
         </el-form-item>
 
-        <!--        <el-form-item>-->
-        <!--          <el-button @click="handleSubmitClick(formRef)" style="width: 200px"-->
-        <!--                     type="primary">-->
-        <!--            开始加载-->
-        <!--          </el-button>-->
-        <!--        </el-form-item>-->
+        <tensor-space-report :model="model" :name="String(currentModel.label)" v-if="model !== null"></tensor-space-report>
+
       </el-form>
 
     </el-col>
     <el-col :span="18" v-loading="isLoading" style="height: 89vh;">
-      <tensor-space-lenet v-if="currentModel.label === 'LeNet'" :data="form.options"></tensor-space-lenet>
-      <tensor-space-acgangen v-else-if="currentModel.label === 'ACGAN'" :data="form.options"></tensor-space-acgangen>
-      <tensor-space-alexnet v-else-if="currentModel.label === 'AlexNet'" :data="form.options"></tensor-space-alexnet>
-      <tensor-space-inception-v3 v-else-if="currentModel.label === 'Inception-v3'"
-                                 :data="form.options"></tensor-space-inception-v3>
-      <tensor-space-mobilenet v-else-if="currentModel.label === 'MobileNet'" :data="form.options"></tensor-space-mobilenet>
-      <tensor-space-resnet50 v-else-if="currentModel.label === 'Resnet50'" :data="form.options"></tensor-space-resnet50>
-      <tensor-space-vgg16 v-else-if="currentModel.label === 'VGG16'" :data="form.options"></tensor-space-vgg16>
+      <tensor-space-lenet
+          v-if="currentModel.label === 'LeNet'"
+          :data="form.options"
+          @change-model="changeModel"
+      ></tensor-space-lenet>
+
+      <tensor-space-acgangen
+          v-else-if="currentModel.label === 'ACGAN'"
+          :data="form.options"
+          @change-model="changeModel"
+      ></tensor-space-acgangen>
+
+      <tensor-space-alexnet
+          v-else-if="currentModel.label === 'AlexNet'"
+          :data="form.options"
+          @change-model="changeModel"
+      ></tensor-space-alexnet>
+
+      <tensor-space-inception-v3
+          v-else-if="currentModel.label === 'Inception-v3'"
+          :data="form.options"
+          @change-model="changeModel"
+      ></tensor-space-inception-v3>
+
+      <tensor-space-mobilenet
+          v-else-if="currentModel.label === 'MobileNet'"
+          :data="form.options"
+          @change-model="changeModel"
+      ></tensor-space-mobilenet>
+
+      <tensor-space-resnet50
+          v-else-if="currentModel.label === 'Resnet50'"
+          :data="form.options"
+          @change-model="changeModel"
+      ></tensor-space-resnet50>
+
+      <tensor-space-vgg16
+          v-else-if="currentModel.label === 'VGG16'"
+          :data="form.options"
+          @change-model="changeModel"
+      ></tensor-space-vgg16>
+
 
     </el-col>
   </el-row>
@@ -62,6 +93,8 @@ import TensorSpaceInceptionV3 from "../tensorspace/TensorSpaceInceptionV3.vue";
 import TensorSpaceMobilenet from "../tensorspace/TensorSpaceMobilenet.vue";
 import TensorSpaceResnet50 from "../tensorspace/TensorSpaceResnet50.vue";
 import TensorSpaceVgg16 from "../tensorspace/TensorSpaceVgg16.vue";
+import TensorSpaceReport from "../components/TensorSpaceReport.vue";
+import {ElMessageBox} from "element-plus";
 
 const store = useStore();
 let modelOptions = ref([
@@ -94,8 +127,15 @@ const currentModel = computed(() => {
 })
 let isLoading = ref(false);
 let response = ref([]);
+let model = ref(null);
 
-
+const changeModel = (m) => {
+  model.value = m;
+}
+const changeSelectModel = (value) => {
+  store.CAPTURE_INVALID();
+  store.REMOVE_TENSORSPACE_STATE();
+}
 </script>
 
 <style scoped>

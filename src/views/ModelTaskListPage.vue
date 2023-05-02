@@ -42,7 +42,7 @@
           {{ JSON.parse(scope.row.measure_method.replaceAll("'", "\"")).join(", ") }}
         </template>
       </el-table-column>
-      <el-table-column prop="measure_method" label="进度" :show-overflow-tooltip="true">
+      <el-table-column prop="measure_method"  label="进度" :show-overflow-tooltip="true">
         <template #default="scope">
 
           <el-tooltip manual
